@@ -1,0 +1,6 @@
+vcpkg_installed
+build
+cmake-build-debug
+cmake-build-release
+*.iml
+.idea

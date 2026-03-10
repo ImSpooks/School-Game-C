@@ -1,0 +1,158 @@
+#include <stdlib.h>
+#include <raylib.h>
+#include "screen/screen.h"
+#include "hud.h"
+#include "level/level.h"
+#include "util/raylib_util.h"
+
+char* dialogue = NULL;
+Screen* screen = NULL;
+HUD hud;
+
+void drawButtons();
+
+const int screenWidth = 320;
+const int screenHeight = 180;
+
+int renderWidth = screenWidth * 4;
+int renderHeight = screenHeight * 4;
+
+int main(void) {
+    InitWindow(renderWidth, renderHeight, "Adventure Game");
+
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+
+    // The target's height is flipped (in the source Rectangle), due to OpenGL reasons
+
+    setScreen(&titleScreen);
+
+    SetTargetFPS(0);
+
+    const RenderTexture2D screenRenderer = LoadRenderTexture(screenWidth, screenHeight / 4 * 3);
+    const RenderTexture2D hudRenderer = LoadRenderTexture(screenWidth, screenHeight / 4);
+
+    hud.texture = hudRenderer;
+    hud.offset = (Rectangle){0, (float)screenHeight / 4 * 3, (float)hudRenderer.texture.width, (float)hudRenderer.texture.height};
+
+    while (!WindowShouldClose()) {
+        renderWidth = GetScreenWidth();
+        renderHeight = GetScreenHeight();
+
+        if (screen == NULL) {
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            // just to be sure
+            EndDrawing();
+            continue;
+        }
+        // Update
+        if (IsKeyDown(KEY_R) && GetScreenWidth() != 1280 && GetScreenHeight() != 720) {
+            SetWindowSize(1280, 720);
+        }
+
+        screen->update(&screenRenderer);
+        updateHud(&hudRenderer);
+
+        // Draw
+        // Screen
+        BeginTextureMode(screenRenderer);
+        {
+            ClearBackground(RAYWHITE);
+            screen->draw(&screenRenderer);
+
+            if (dialogue != NULL) {
+                int width = MeasureText(dialogue, 8);
+
+                DrawOutlinedText(dialogue, (screenRenderer.texture.width / 2) - (width / 2), screenRenderer.texture.height - 18, 12, WHITE, 1, BLACK);
+            }
+        }
+        EndTextureMode();
+
+        // Hud
+        BeginTextureMode(hudRenderer);
+        {
+            ClearBackground(DARKGRAY);
+            drawHud(&hudRenderer);
+        }
+        EndTextureMode();
+
+        BeginDrawing();
+
+        const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
+        const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
+
+        DrawTexturePro(
+            screenRenderer.texture,
+            (Rectangle){0, 0, (float) screenWidth, -(float) (screenHeight / 4.0 * 3.0)},
+            (Rectangle){
+                -virtualWidthRatio, -virtualHeightRatio, (float) renderWidth + virtualWidthRatio * 2.0f,
+                (float) (renderHeight / 4.0 * 3.0) + virtualHeightRatio * 2.0f
+            },
+            (Vector2){0, 0},
+            0.0f,
+            WHITE
+        );
+
+
+        DrawTexturePro(
+            hudRenderer.texture,
+            (Rectangle){0, 0, (float) screenWidth, -(float) (screenHeight / 4.0)},
+            (Rectangle){
+                -virtualWidthRatio, -virtualHeightRatio,
+                (float) renderWidth + virtualWidthRatio * 2.0f, (float) renderHeight / 4.0f + virtualHeightRatio * 2.0f
+            },
+            (Vector2){0, (float) -(renderHeight / 4.0 * 3.0)},
+            0.0f,
+            WHITE
+        );
+
+        EndDrawing();
+    }
+    UnloadRenderTexture(screenRenderer);
+    UnloadRenderTexture(hudRenderer);
+
+    CloseWindow();
+
+    return 0;
+}
+
+void setScreen(Screen* newScreen) {
+    if (newScreen == screen) {
+        return;
+    }
+
+    const Screen* prevScreen = screen;
+
+    screen = newScreen;
+    newScreen->initialize();
+
+    if (prevScreen != NULL && prevScreen != newScreen) {
+        prevScreen->unload();
+    }
+}
+
+void setDialogue(char* text) {
+    dialogue = text;
+}
+
+float getWidthScale() {
+    const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
+    return virtualWidthRatio;
+}
+
+float getHeightScale() {
+    const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
+    return virtualHeightRatio;
+}
+
+Vector2 getScaledMousePos() {
+    float mouseX = (float) GetMouseX() / getWidthScale();
+    float mouseY = (float) GetMouseY() / getHeightScale();
+    return (Vector2){mouseX, mouseY};
+}
+
+Vector2 getScaledMousePosOffset(Vector2 offset) {
+    float mouseX = (float) GetMouseX() / getWidthScale();
+    float mouseY = (float) GetMouseY() / getHeightScale();
+    return (Vector2) { -offset.x + mouseX, -offset.y + mouseY };
+}
