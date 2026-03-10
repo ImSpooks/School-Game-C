@@ -1,6 +1,10 @@
-#include "raylib_util.h"
+#include "util.h"
+
+#include <assert.h>
 #include <raylib.h>
 #include <stddef.h>
+#include <stdlib.h>
+#include <string.h>
 
 void DrawOutlinedText(const char *text, int posX, int posY, int fontSize, Color color, int outlineSize, Color outlineColor) {
     if (text == NULL) return;
@@ -14,7 +18,7 @@ void DrawOutlinedText(const char *text, int posX, int posY, int fontSize, Color 
     for (int dy = -r; dy <= r; dy++) {
         for (int dx = -r; dx <= r; dx++) {
             if (dx == 0 && dy == 0) continue;
-                DrawText(text, posX + dx, posY + dy, fontSize, outlineColor);
+            DrawText(text, posX + dx, posY + dy, fontSize, outlineColor);
         }
     }
 

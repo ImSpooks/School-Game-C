@@ -77,6 +77,11 @@ Level* getLevel() {
 }
 
 void changeLevel(Level* level) {
+    if (TRANSITION_LENGTH == 0) {
+        setLevel(level);
+        return;
+    }
+
     setButtons(NULL, 0);
     if (swappingLevel) {
         return;
@@ -100,5 +105,12 @@ void setLevel(Level* level) {
 
     if (prevLevel != NULL && prevLevel != currentLevel) {
         prevLevel->unload();
+    }
+}
+
+void reloadLevel() {
+    if (currentLevel != NULL) {
+        currentLevel->unload();
+        currentLevel->load();
     }
 }

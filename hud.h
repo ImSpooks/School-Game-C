@@ -4,6 +4,7 @@
 
 struct HUDOptions {
     bool render_hud;
+    bool render_background;
     bool render_buttons;
 };
 

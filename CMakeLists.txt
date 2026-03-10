@@ -17,11 +17,20 @@ add_executable(TestRaylib
         screen/game_screen.h
         hud.c
         hud.h
-        util/raylib_util.h
-        util/raylib_util.c
-        util/raylib_util.c
+        util/util.h
+        util/util.c
+        util/util.c
         level/level_start.c
         level/level_forest1.c
+        level/level_forest2.c
+        level/level_forest3.c
+        level/level_village1.c
+        level/level_village2.c
+        level/level_village3.c
+        level/level_village4.c
+        level/level_wizard1.c
+        level/level_wizard2.c
+        level/level_wizard3.c
 )
 
 # Link raylib to the correct target

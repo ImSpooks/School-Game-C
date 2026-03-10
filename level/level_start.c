@@ -9,19 +9,19 @@
 void loadLevelStart();
 void unloadLevelStart();
 
-void goIntoTheForest();
-void giveHealthPotion();
-void talkToAngel();
-void attackHawk();
+void start_goIntoTheForest();
+void start_giveHealthPotion();
+void start_talkToAngel();
+void start_attackHawk();
 
 Level levelStart = {
     .load = loadLevelStart,
     .unload = unloadLevelStart,
 };
 
-static Button* buttons;
+Button* start_buttons;
 
-static bool firstLoaded = false;
+bool firstLoaded = false;
 
 void loadLevelStart() {
     levelStart.texture = LoadTexture("assets/levels/start.png");
@@ -34,55 +34,55 @@ void loadLevelStart() {
     }
 
 
-    buttons = (Button*) malloc(sizeof(Button) * 2);
+    start_buttons = (Button*) malloc(sizeof(Button) * 2);
 
-    buttons[0] = (Button) {
+    start_buttons[0] = (Button) {
         .text = "Go into the woods",
-        .onClick = goIntoTheForest,
+        .onClick = start_goIntoTheForest,
     };
 
     if (false) { // TODO: Check for healing potion
-        buttons[1] = (Button) {
+        start_buttons[1] = (Button) {
             .text = "Give health potion",
-            .onClick = giveHealthPotion
+            .onClick = start_giveHealthPotion
         };
     } else {
-        buttons[1] = (Button) {
+        start_buttons[1] = (Button) {
             .text = "Talk to the Angel",
-            .onClick = talkToAngel,
+            .onClick = start_talkToAngel,
         };
     }
 
 
-    setButtons(buttons, 2);
+    setButtons(start_buttons, 2);
 }
 
 void unloadLevelStart() {
-    free(buttons);
+    free(start_buttons);
     UnloadTexture(levelStart.texture);
 }
 
-void goIntoTheForest() {
+void start_goIntoTheForest() {
     changeLevel(&levelForest1);
 }
 
-void giveHealthPotion() {
+void start_giveHealthPotion() {
     setDialogue("Angel: Thank you! Now help me defeat this monster!");
 
-    buttons = (Button*) malloc(sizeof(Button) * 1);
+    start_buttons = (Button*) malloc(sizeof(Button) * 1);
 
-    buttons[0] = (Button) {
+    start_buttons[0] = (Button) {
         .text = "Attack the giant Hawk",
-        .onClick = attackHawk,
+        .onClick = start_attackHawk,
     };
 
-    setButtons(buttons, 1);
+    setButtons(start_buttons, 1);
 }
 
-void talkToAngel() {
+void start_talkToAngel() {
     setDialogue("Angel: I got weakened by this giant hawk, please find a healing potion.");
 }
 
-void attackHawk() {
+void start_attackHawk() {
     
 }

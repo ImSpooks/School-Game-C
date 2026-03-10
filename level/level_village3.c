@@ -1,0 +1,68 @@
+#include <raylib.h>
+#include <stdlib.h>
+
+#include "level.h"
+#include "../hud.h"
+#include "../screen/game_screen.h"
+
+void loadLevelVillage3();
+void unloadLevelVillage3();
+
+void village3_battleFlowey();
+void village3_goBack();
+
+Level levelVillage3 = {
+    .load = loadLevelVillage3,
+    .unload = unloadLevelVillage3
+};
+
+Button* village3_buttons;
+
+void loadLevelVillage3() {
+    levelVillage3.texture = LoadTexture("assets/levels/village3.png");
+
+
+    if (false) { // TODO boss flowey defeated
+        village3_buttons = (Button*) malloc(sizeof(Button) * 1);
+
+        // TODO: Defeat dialogue
+        setDialogue("Farmer Johan: Hey, how's it going?");
+
+        village3_buttons[0] = (Button) {
+            .text = "Go back",
+            .onClick = village3_goBack
+        };
+
+        setButtons(village3_buttons, 1);
+    } else {
+        setDialogueMulti((char*[]) {"Farmer Johan: Could you help me defeat this monster?", "I'll give you a golden coin as a reward."}, 2);
+
+        village3_buttons = (Button*) malloc(sizeof(Button) * 2);
+
+        village3_buttons[0] = (Button) {
+            .text = "Attack the enemy",
+            .onClick = village3_battleFlowey
+        };
+
+        village3_buttons[1] = (Button) {
+            .text = "Go back",
+            .onClick = village3_goBack
+        };
+
+        setButtons(village3_buttons, 2);
+    }
+
+}
+
+void unloadLevelVillage3() {
+    free(village3_buttons);
+    UnloadTexture(levelVillage3.texture);
+}
+
+void village3_battleFlowey() {
+
+}
+
+void village3_goBack() {
+    changeLevel(&levelVillage1);
+}

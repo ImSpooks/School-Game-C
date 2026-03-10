@@ -4,14 +4,13 @@
 #include "level.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
-#include "../screen/screen.h"
 
 void loadLevelForest1();
 void unloadLevelForest1();
 
-void goLeft();
-void goRight();
-void goBack();
+void forest1_goLeft();
+void forest1_goRight();
+void forest1_goBack();
 
 
 Level levelForest1 = {
@@ -19,44 +18,46 @@ Level levelForest1 = {
     .unload = unloadLevelForest1
 };
 
-static Button* buttons;
+Button* forest1_buttons;
 
 void loadLevelForest1() {
-    levelForest1.texture = LoadTexture("assets/levels/forest_1.png");
+    levelForest1.texture = LoadTexture("assets/levels/forest1.png");
 
-    buttons = (Button*) malloc(sizeof(Button) * 3);
+    setDialogue("2 paths, which one should I take?");
 
-    buttons[0] = (Button) {
+    forest1_buttons = (Button*) malloc(sizeof(Button) * 3);
+
+    forest1_buttons[0] = (Button) {
         .text = "Go left",
-        .onClick = goLeft,
+        .onClick = forest1_goLeft,
     };
 
-    buttons[1] = (Button) {
+    forest1_buttons[1] = (Button) {
         .text = "Go right",
-        .onClick = goRight,
+        .onClick = forest1_goRight,
     };
 
-    buttons[2] = (Button) {
+    forest1_buttons[2] = (Button) {
         .text = "Go back",
-        .onClick = goBack,
+        .onClick = forest1_goBack,
     };
 
-    setButtons(buttons, 3);
+    setButtons(forest1_buttons, 3);
 }
 
 void unloadLevelForest1() {
-    free(buttons);
+    free(forest1_buttons);
     UnloadTexture(levelForest1.texture);
 }
 
-void goLeft() {
-
+void forest1_goLeft() {
+    changeLevel(&levelVillage1);
 }
 
-void goRight() {
-
+void forest1_goRight() {
+    changeLevel(&levelForest2);
 }
 
-void goBack() {
+void forest1_goBack() {
     changeLevel(&levelStart);
 }

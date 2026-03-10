@@ -22,22 +22,22 @@ Screen titleScreen = {
 bool started = false;
 float timer = 0;
 
-static Button* buttons;
+static Button* forest3_buttons;
 
 void initializeTitleScreen() {
     setDialogue("Click the button to start the game");
 
-    buttons = (Button*) malloc(sizeof(Button) * 1);
-    buttons[0] = (Button) {
+    forest3_buttons = (Button*) malloc(sizeof(Button) * 1);
+    forest3_buttons[0] = (Button) {
         .text = "Start Game",
         .onClick = startButton,
     };
 
-    setButtons(buttons, 1);
+    setButtons(forest3_buttons, 1);
 }
 
 void unloadTitleScreen() {
-    free(buttons);
+    free(forest3_buttons);
 }
 
 void updateTitleScreen(const RenderTexture2D* texture) {

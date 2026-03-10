@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "util/raylib_util.h"
+#include "util/util.h"
 
 #define BUTTON_FONT_SIZE 8
 #define BUTTON_PADDING_X 6

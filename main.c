@@ -1,11 +1,15 @@
 #include <stdlib.h>
 #include <raylib.h>
+#include <stdio.h>
+
 #include "screen/screen.h"
 #include "hud.h"
-#include "level/level.h"
-#include "util/raylib_util.h"
+#include "util/util.h"
 
-char* dialogue = NULL;
+char** dialogue = NULL;
+int dialogueLines = 0;
+bool dialogueAllocated = false;
+
 Screen* screen = NULL;
 HUD hud;
 
@@ -35,6 +39,7 @@ int main(void) {
     hud.offset = (Rectangle){0, (float)screenHeight / 4 * 3, (float)hudRenderer.texture.width, (float)hudRenderer.texture.height};
 
     hud.options.render_hud = true;
+    hud.options.render_background = true;
     hud.options.render_buttons = true;
 
     while (!WindowShouldClose()) {
@@ -50,7 +55,7 @@ int main(void) {
         }
         // Update
         if (IsKeyDown(KEY_R) && GetScreenWidth() != 1280 && GetScreenHeight() != 720) {
-            SetWindowSize(1280, 720);
+                SetWindowSize(1280, 720);
         }
         const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
         const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
@@ -66,9 +71,11 @@ int main(void) {
             screen->draw(&screenRenderer);
 
             if (dialogue != NULL) {
-                int width = MeasureText(dialogue, 8);
-
-                DrawOutlinedText(dialogue, (screenRenderer.texture.width / 2) - (width / 2), (int)(hud.offset.y - 22), 12, WHITE, 1, BLACK);
+                for (int i = 0; i < dialogueLines; i++) {
+                    const char* text = *(dialogue + i);
+                    int width = MeasureText(text, 8);
+                    DrawOutlinedText(text, (screenRenderer.texture.width / 2) - (width / 2), (int)(hud.offset.y - 22) - ((dialogueLines - i) * 15), 12, WHITE, 1, BLACK);
+                }
             }
         }
         EndTextureMode();
@@ -76,7 +83,9 @@ int main(void) {
         // Hud
         BeginTextureMode(hudRenderer);
         {
-            ClearBackground((Color){ 80, 80, 80, (int) (255.0 / 4.0) });
+            if (hud.options.render_background) {
+                ClearBackground((Color){ 80, 80, 80, (int) (255.0 / 4.0) });
+            }
             drawHud(&hudRenderer);
         }
         EndTextureMode();
@@ -114,6 +123,12 @@ int main(void) {
     UnloadRenderTexture(screenRenderer);
     UnloadRenderTexture(hudRenderer);
 
+    if (dialogue != NULL && dialogueAllocated) {
+        free(dialogue);
+        dialogue = NULL;
+        dialogueAllocated = 0;
+    }
+
     CloseWindow();
 
     return 0;
@@ -135,7 +150,32 @@ void setScreen(Screen* newScreen) {
 }
 
 void setDialogue(char* text) {
-    dialogue = text;
+    setDialogueMulti((char*[]){ text }, 1);
+}
+
+void setDialogueMulti(char* text[], int lines) {
+    if (dialogue != NULL && dialogueAllocated) {
+        free(dialogue);
+        dialogue = NULL;
+        dialogueAllocated = false;
+    }
+
+    if (lines <= 0) {
+        dialogue = NULL;
+        dialogueLines = 0;
+        dialogueAllocated = false;
+        return;
+    }
+
+    char** newLines = malloc(sizeof(char*) * (size_t)lines);
+
+    for (int i = 0; i < lines; i++) {
+        newLines[i] = text[i];
+    }
+
+    dialogue = newLines;
+    dialogueLines = lines;
+    dialogueAllocated = true;
 }
 
 float getWidthScale() {
