@@ -2,9 +2,15 @@
 #define TESTRAYLIB_HUD_H
 #include <raylib.h>
 
+struct HUDOptions {
+    bool render_hud;
+    bool render_buttons;
+};
+
 typedef struct HUD {
     RenderTexture2D texture;
     Rectangle offset;
+    struct HUDOptions options;
 } HUD;
 
 extern HUD hud;

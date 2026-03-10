@@ -11,11 +11,11 @@ HUD hud;
 
 void drawButtons();
 
-const int screenWidth = 320;
-const int screenHeight = 180;
+const int screenWidth = 320 * 2;
+const int screenHeight = 180 * 2;
 
-int renderWidth = screenWidth * 4;
-int renderHeight = screenHeight * 4;
+int renderWidth = screenWidth * (1280 / screenWidth);
+int renderHeight = screenHeight * (720 / screenHeight);
 
 int main(void) {
     InitWindow(renderWidth, renderHeight, "Adventure Game");
@@ -28,11 +28,14 @@ int main(void) {
 
     SetTargetFPS(0);
 
-    const RenderTexture2D screenRenderer = LoadRenderTexture(screenWidth, screenHeight / 4 * 3);
+    const RenderTexture2D screenRenderer = LoadRenderTexture(screenWidth, screenHeight);
     const RenderTexture2D hudRenderer = LoadRenderTexture(screenWidth, screenHeight / 4);
 
     hud.texture = hudRenderer;
     hud.offset = (Rectangle){0, (float)screenHeight / 4 * 3, (float)hudRenderer.texture.width, (float)hudRenderer.texture.height};
+
+    hud.options.render_hud = true;
+    hud.options.render_buttons = true;
 
     while (!WindowShouldClose()) {
         renderWidth = GetScreenWidth();
@@ -49,6 +52,8 @@ int main(void) {
         if (IsKeyDown(KEY_R) && GetScreenWidth() != 1280 && GetScreenHeight() != 720) {
             SetWindowSize(1280, 720);
         }
+        const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
+        const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
 
         screen->update(&screenRenderer);
         updateHud(&hudRenderer);
@@ -63,7 +68,7 @@ int main(void) {
             if (dialogue != NULL) {
                 int width = MeasureText(dialogue, 8);
 
-                DrawOutlinedText(dialogue, (screenRenderer.texture.width / 2) - (width / 2), screenRenderer.texture.height - 18, 12, WHITE, 1, BLACK);
+                DrawOutlinedText(dialogue, (screenRenderer.texture.width / 2) - (width / 2), (int)(hud.offset.y - 22), 12, WHITE, 1, BLACK);
             }
         }
         EndTextureMode();
@@ -71,22 +76,20 @@ int main(void) {
         // Hud
         BeginTextureMode(hudRenderer);
         {
-            ClearBackground(DARKGRAY);
+            ClearBackground((Color){ 80, 80, 80, (int) (255.0 / 4.0) });
             drawHud(&hudRenderer);
         }
         EndTextureMode();
 
         BeginDrawing();
 
-        const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
-        const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
 
         DrawTexturePro(
             screenRenderer.texture,
-            (Rectangle){0, 0, (float) screenWidth, -(float) (screenHeight / 4.0 * 3.0)},
+            (Rectangle){0, 0, (float)screenRenderer.texture.width, -(float)screenRenderer.texture.height},
             (Rectangle){
                 -virtualWidthRatio, -virtualHeightRatio, (float) renderWidth + virtualWidthRatio * 2.0f,
-                (float) (renderHeight / 4.0 * 3.0) + virtualHeightRatio * 2.0f
+                (float) (renderHeight) + virtualHeightRatio * 2.0f
             },
             (Vector2){0, 0},
             0.0f,
@@ -96,7 +99,7 @@ int main(void) {
 
         DrawTexturePro(
             hudRenderer.texture,
-            (Rectangle){0, 0, (float) screenWidth, -(float) (screenHeight / 4.0)},
+            (Rectangle){0, 0, (float) hudRenderer.texture.width, -(float) hudRenderer.texture.height},
             (Rectangle){
                 -virtualWidthRatio, -virtualHeightRatio,
                 (float) renderWidth + virtualWidthRatio * 2.0f, (float) renderHeight / 4.0f + virtualHeightRatio * 2.0f

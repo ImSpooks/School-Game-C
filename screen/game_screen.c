@@ -1,6 +1,7 @@
 #include "game_screen.h"
 
 #include <stddef.h>
+#include <stdio.h>
 
 #include "../hud.h"
 
@@ -12,8 +13,8 @@ void updateGameScreen(const RenderTexture2D* texture);
 Screen gameScreen = {
     .initialize = initializeGameScreen,
     .unload = unloadGameScreen,
-    .update = drawGameScreen,
-    .draw = updateGameScreen,
+    .update = updateGameScreen,
+    .draw = drawGameScreen,
 };
 
 Level* currentLevel = NULL;
@@ -46,9 +47,9 @@ void drawGameScreen(const RenderTexture2D* texture) {
     if (swappingLevel) {
         int alpha;
         if (fadeIn) {
-            alpha = (int) (timer * TRANSITION_LENGTH * 255);
+            alpha = (int) ((timer * 2) / TRANSITION_LENGTH * 255);
         } else {
-            alpha = (int) ((TRANSITION_LENGTH - timer) * TRANSITION_LENGTH * 255);
+            alpha = 255 - (int) ((timer * 2) / TRANSITION_LENGTH * 255);
         }
         DrawRectangle(0, 0, GetScreenHeight(), GetScreenHeight(), (Color) {0, 0, 0, (unsigned char) alpha});
     }
@@ -60,7 +61,7 @@ void updateGameScreen(const RenderTexture2D* texture) {
 
         if (timer > TRANSITION_LENGTH) {
             swappingLevel = false;
-            currentLevel->load();
+            hud.options.render_buttons = true;
         }
         if (timer > TRANSITION_LENGTH / 2 && fadeIn) {
             fadeIn = false;
@@ -80,6 +81,8 @@ void changeLevel(Level* level) {
     if (swappingLevel) {
         return;
     }
+    hud.options.render_buttons = false;
+    timer = 0;
     newLevel = level;
     fadeIn = true;
     swappingLevel = true;
@@ -93,6 +96,7 @@ void setLevel(Level* level) {
     const Level* prevLevel = currentLevel;
 
     currentLevel = level;
+    level->load();
 
     if (prevLevel != NULL && prevLevel != currentLevel) {
         prevLevel->unload();

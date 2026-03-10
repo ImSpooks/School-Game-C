@@ -4,7 +4,7 @@
 #include "screen.h"
 #include "../level/level.h"
 
-#define TRANSITION_LENGTH CLITERAL((float) 2)
+#define TRANSITION_LENGTH CLITERAL((float) 1)
 
 void setLevel(Level* level);
 Level* getLevel();

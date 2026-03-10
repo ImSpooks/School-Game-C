@@ -44,7 +44,7 @@ void updateTitleScreen(const RenderTexture2D* texture) {
     if (started) {
         timer += GetFrameTime();
         if (timer > 1.0f) {
-            //setScreen(&gameScreen);
+            setScreen(&gameScreen);
         }
     }
 }

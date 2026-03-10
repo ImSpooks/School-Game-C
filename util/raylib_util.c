@@ -14,9 +14,7 @@ void DrawOutlinedText(const char *text, int posX, int posY, int fontSize, Color 
     for (int dy = -r; dy <= r; dy++) {
         for (int dx = -r; dx <= r; dx++) {
             if (dx == 0 && dy == 0) continue;
-            if (dx*dx + dy*dy <= r2) {
                 DrawText(text, posX + dx, posY + dy, fontSize, outlineColor);
-            }
         }
     }
 
