@@ -51,7 +51,7 @@ void drawGameScreen(const RenderTexture2D* texture) {
         } else {
             alpha = 255 - (int) ((timer * 2) / TRANSITION_LENGTH * 255);
         }
-        DrawRectangle(0, 0, GetScreenHeight(), GetScreenHeight(), (Color) {0, 0, 0, (unsigned char) alpha});
+        DrawRectangle(0, 0, texture->texture.width, texture->texture.height, (Color) {0, 0, 0, (unsigned char) alpha});
     }
 }
 
@@ -61,7 +61,7 @@ void updateGameScreen(const RenderTexture2D* texture) {
 
         if (timer > TRANSITION_LENGTH) {
             swappingLevel = false;
-            hud.options.render_buttons = true;
+            hud.render_buttons = true;
         }
         if (timer > TRANSITION_LENGTH / 2 && fadeIn) {
             fadeIn = false;
@@ -86,7 +86,7 @@ void changeLevel(Level* level) {
     if (swappingLevel) {
         return;
     }
-    hud.options.render_buttons = false;
+    hud.render_buttons = false;
     timer = 0;
     newLevel = level;
     fadeIn = true;

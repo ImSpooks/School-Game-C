@@ -21,36 +21,51 @@
 #define BUTTON_BACKGROUND_PRESS CLITERAL(Color){ 95, 216, 99, 255 }
 #define BUTTON_BORDER_BACKGROUND_PRESS CLITERAL(Color){ 104, 237, 106, 255 }
 
+#define DIALOGUE_FONT_SIZE 12
+#define DIALOGUE_SPACING 3
+
+
 Button *buttons = NULL;
 int button_count = 0;
+
+struct Dialogue dialogue;
 
 void tickButtons(const RenderTexture2D *texture);
 
 void renderButtons(const RenderTexture2D *texture);
 
 void updateHud(const RenderTexture2D *texture) {
-    if (!hud.options.render_hud) {
+    if (!hud.render_hud) {
         return;
     }
 
-    if (hud.options.render_buttons && buttons != NULL && button_count > 0) {
+    if (hud.render_buttons && buttons != NULL && button_count > 0) {
         tickButtons(texture);
     }
 }
 
 void drawHud(const RenderTexture2D *texture) {
-    if (!hud.options.render_hud) {
+    if (!hud.render_hud) {
         return;
     }
 
-    if (hud.options.render_buttons && buttons != NULL && button_count > 0) {
+    if (hud.render_buttons && buttons != NULL && button_count > 0) {
         renderButtons(texture);
+    }
+
+    if (dialogue.lines != NULL) {
+        for (int i = 0; i < dialogue.lineCount; i++) {
+            const char* text = *(dialogue.lines + i);
+            const int width = MeasureText(text, 8);
+            const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2) - ((dialogue.lineCount - i) * (DIALOGUE_FONT_SIZE + DIALOGUE_SPACING)) - BUTTON_SPACING;
+            DrawOutlinedText(text, (texture->texture.width / 2) - (width / 2), y, DIALOGUE_FONT_SIZE, WHITE, 1, BLACK);
+        }
     }
 }
 
 void tickButtons(const RenderTexture2D *texture) {
     const int middle = texture->texture.width / 2;
-    const Vector2 mousePos = getScaledMousePosOffset((Vector2){hud.offset.x, hud.offset.y});
+    const Vector2 mousePos = getScaledMousePos();
 
     int *widths = malloc(button_count * sizeof(int));
 
@@ -67,7 +82,7 @@ void tickButtons(const RenderTexture2D *texture) {
     totalWidth += (button_count - 1) * BUTTON_SPACING;
 
     int startX = middle - totalWidth / 2;
-    const int y = BUTTON_PADDING_Y * 2;
+    const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
 
     for (int i = 0; i < button_count; i++) {
         const int width = widths[i];
@@ -118,7 +133,7 @@ void renderButtons(const RenderTexture2D *texture) {
     totalWidth += (button_count - 1) * BUTTON_SPACING;
 
     int startX = middle - totalWidth / 2;
-    const int y = BUTTON_PADDING_Y * 2;
+    const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
 
     for (int i = 0; i < button_count; i++) {
         const int width = widths[i];

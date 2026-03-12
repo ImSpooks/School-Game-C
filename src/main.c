@@ -9,12 +9,11 @@
 #include "util/util.h"
 #include "player/player.h"
 
-char** dialogue = NULL;
 int dialogueLines = 0;
 bool dialogueAllocated = false;
 
 Screen* screen = NULL;
-HUD hud;
+struct HUDOptions hud;
 
 void drawButtons();
 
@@ -36,14 +35,10 @@ int main(void) {
     SetTargetFPS(0);
 
     const RenderTexture2D screenRenderer = LoadRenderTexture(screenWidth, screenHeight);
-    const RenderTexture2D hudRenderer = LoadRenderTexture(screenWidth, screenHeight / 4);
 
-    hud.texture = hudRenderer;
-    hud.offset = (Rectangle){0, (float)screenHeight / 4 * 3, (float)hudRenderer.texture.width, (float)hudRenderer.texture.height};
-
-    hud.options.render_hud = true;
-    hud.options.render_background = false;
-    hud.options.render_buttons = true;
+    hud.render_hud = true;
+    hud.render_background = false;
+    hud.render_buttons = true;
 
     player.inventory = vector_create();
     player.maxHealth = 100;
@@ -71,7 +66,7 @@ int main(void) {
         const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
 
         screen->update(&screenRenderer);
-        updateHud(&hudRenderer);
+        updateHud(&screenRenderer);
 
         // Draw
         // Screen
@@ -80,25 +75,7 @@ int main(void) {
             ClearBackground(RAYWHITE);
             screen->draw(&screenRenderer);
 
-            if (dialogue != NULL) {
-                for (int i = 0; i < dialogueLines; i++) {
-                    const char* text = *(dialogue + i);
-                    int width = MeasureText(text, 8);
-                    DrawOutlinedText(text, (screenRenderer.texture.width / 2) - (width / 2), (int)(hud.offset.y - 22) - ((dialogueLines - i) * 15), 12, WHITE, 1, BLACK);
-                }
-            }
-        }
-        EndTextureMode();
-
-        // Hud
-        BeginTextureMode(hudRenderer);
-        {
-            if (hud.options.render_background) {
-                ClearBackground((Color){ 80, 80, 80, (int) (255.0 / 4.0) });
-            } else {
-                ClearBackground((Color){ 0, 0, 0, 0 });
-            }
-            drawHud(&hudRenderer);
+            drawHud(&screenRenderer);
         }
         EndTextureMode();
 
@@ -117,27 +94,13 @@ int main(void) {
             WHITE
         );
 
-
-        DrawTexturePro(
-            hudRenderer.texture,
-            (Rectangle){0, 0, (float) hudRenderer.texture.width, -(float) hudRenderer.texture.height},
-            (Rectangle){
-                -virtualWidthRatio, -virtualHeightRatio,
-                (float) renderWidth + virtualWidthRatio * 2.0f, (float) renderHeight / 4.0f + virtualHeightRatio * 2.0f
-            },
-            (Vector2){0, (float) -(renderHeight / 4.0 * 3.0)},
-            0.0f,
-            WHITE
-        );
-
         EndDrawing();
     }
     UnloadRenderTexture(screenRenderer);
-    UnloadRenderTexture(hudRenderer);
 
-    if (dialogue != NULL && dialogueAllocated) {
-        free(dialogue);
-        dialogue = NULL;
+    if (dialogue.lines != NULL && dialogueAllocated) {
+        free(dialogue.lines);
+        dialogue.lines = NULL;
         dialogueAllocated = 0;
     }
 
@@ -168,14 +131,14 @@ void setDialogue(char* text) {
 }
 
 void setDialogueMulti(char* text[], int lines) {
-    if (dialogue != NULL && dialogueAllocated) {
-        free(dialogue);
-        dialogue = NULL;
+    if (dialogue.lines != NULL && dialogueAllocated) {
+        free(dialogue.lines);
+        dialogue.lines = NULL;
         dialogueAllocated = false;
     }
 
     if (lines <= 0) {
-        dialogue = NULL;
+        dialogue.lines = NULL;
         dialogueLines = 0;
         dialogueAllocated = false;
         return;
@@ -187,8 +150,8 @@ void setDialogueMulti(char* text[], int lines) {
         newLines[i] = text[i];
     }
 
-    dialogue = newLines;
-    dialogueLines = lines;
+    dialogue.lines = newLines;
+    dialogue.lineCount = lines;
     dialogueAllocated = true;
 }
 
@@ -206,10 +169,4 @@ Vector2 getScaledMousePos() {
     float mouseX = (float) GetMouseX() / getWidthScale();
     float mouseY = (float) GetMouseY() / getHeightScale();
     return (Vector2){mouseX, mouseY};
-}
-
-Vector2 getScaledMousePosOffset(Vector2 offset) {
-    float mouseX = (float) GetMouseX() / getWidthScale();
-    float mouseY = (float) GetMouseY() / getHeightScale();
-    return (Vector2) { -offset.x + mouseX, -offset.y + mouseY };
 }

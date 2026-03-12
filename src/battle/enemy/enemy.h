@@ -12,8 +12,8 @@ typedef void (*enemy_unload_fn)(Enemy*);
 struct Enemy {
     Texture2D texture;
 
-    int max_health;
-    int health;
+    float max_health;
+    float health;
     int attack_stat;
     int defence_stat;
 

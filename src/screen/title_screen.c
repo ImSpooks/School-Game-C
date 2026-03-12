@@ -54,7 +54,7 @@ void drawTitleScreen(const RenderTexture2D* texture) {
 
     if (started) {
         const unsigned char alpha = (unsigned char) (timer > 1.0f ? 255 : (timer * 255));
-        DrawRectangle(0, 0, GetScreenHeight(), GetScreenHeight(), (Color) {0, 0, 0, alpha});
+        DrawRectangle(0, 0, texture->texture.width, texture->texture.height, (Color) {0, 0, 0, alpha});
     }
 }
 

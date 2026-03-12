@@ -8,13 +8,13 @@ struct HUDOptions {
     bool render_buttons;
 };
 
-typedef struct HUD {
-    RenderTexture2D texture;
-    Rectangle offset;
-    struct HUDOptions options;
-} HUD;
+struct Dialogue {
+    char** lines;
+    int lineCount;
+};
 
-extern HUD hud;
+extern struct HUDOptions hud;
+extern struct Dialogue dialogue;
 
 typedef struct Button {
     char* text;

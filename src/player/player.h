@@ -3,6 +3,8 @@
 
 #include "../objects.h"
 
+#define PLAYER_SPEED 64
+
 typedef struct PlayerFlags {
     bool boss_flowey;
     bool boss_bear;
@@ -20,6 +22,9 @@ typedef struct Player {
     int health;
     int maxHealth;
     PlayerFlags flags;
+
+    Vector2 position;
+    float invincibility_timer;
 } Player;
 
 extern Player player;
