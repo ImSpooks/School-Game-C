@@ -4,6 +4,7 @@
 
 #define CALCULATING_DAMAGE_LENGTH   1.5f
 #define DEALING_DAMAGE_LENGTH       0.75f
+#define RENDERING_DAMAGE_LENGTH     1.0f
 
 #define BATTLE_BOUNDS (Rectangle) {(640 / 2) - (192 / 2), (360 / 3 * 2) - (132 / 2), 192, 132}
 #define BATTLE_BOUNDS_MIDDLE (Vector2) {BATTLE_BOUNDS.x + BATTLE_BOUNDS.width / 2, BATTLE_BOUNDS.y + BATTLE_BOUNDS.height / 2}

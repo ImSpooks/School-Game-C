@@ -5,6 +5,7 @@
 
 typedef struct Level {
     Texture2D texture;
+    Music* music;
     void (*load)();
     void (*unload)();
 } Level;

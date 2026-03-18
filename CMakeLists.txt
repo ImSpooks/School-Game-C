@@ -9,7 +9,6 @@ find_package(raylib CONFIG REQUIRED)
 add_executable(TestRaylib
         src/main.c
         src/objects.h
-        src/level/level.c
         src/level/level.h
         src/screen/title_screen.c
         src/screen/screen.h

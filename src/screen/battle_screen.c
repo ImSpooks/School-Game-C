@@ -3,6 +3,7 @@
 #include <math.h>
 #include <raylib.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "screen.h"
 #include "vec.h"
@@ -36,6 +37,12 @@ Texture2D texture_damage_slice;
 
 Texture2D texture_soul;
 
+Sound sound_attack;
+Sound sound_damage_enemy;
+Sound sound_damage_take;
+Sound sound_victory;
+
+
 Button* battle_buttons;
 
 void initializeBattleScreen() {
@@ -45,6 +52,11 @@ void initializeBattleScreen() {
     texture_damage_slider = LoadTexture("assets/textures/ui/damage_slider.png");
     texture_damage_slice = LoadTexture("assets/textures/ui/damage_slice.png");
     texture_soul = LoadTexture("assets/textures/ui/soul.png");
+
+    sound_attack = LoadSound("assets/sfx/attack.wav");
+    sound_damage_enemy = LoadSound("assets/sfx/damage_enemy.wav");
+    sound_damage_take = LoadSound("assets/sfx/damage_take.wav");
+    sound_victory = LoadSound("assets/sfx/victory.wav");
 
     activeBattle.enemy.initialize(&activeBattle.enemy);
     activeBattle.enemy.projectiles = vector_create();
@@ -58,13 +70,21 @@ void initializeBattleScreen() {
 
     setButtons(battle_buttons, 1);
 
+
+    PlayMusicStream(activeBattle.enemy.music);
 }
 
 void unloadBattleScreen() {
+    StopMusicStream(activeBattle.enemy.music);
+
     UnloadTexture(texture_damage_bar);
     UnloadTexture(texture_damage_slider);
     UnloadTexture(texture_damage_slice);
     UnloadTexture(texture_soul);
+
+    UnloadSound(sound_attack);
+    UnloadSound(sound_damage_enemy);
+    UnloadSound(sound_damage_take);
 
     vector_free(activeBattle.enemy.projectiles);
     activeBattle.enemy.unload(&activeBattle.enemy);
@@ -73,6 +93,8 @@ void unloadBattleScreen() {
 }
 
 void updateBattleScreen(const RenderTexture2D* texture) {
+    UpdateMusicStream(activeBattle.enemy.music);
+
     float frame_time = GetFrameTime();
 
     if (battleOptions.state == CALCULATING_DAMAGE) {
@@ -80,7 +102,7 @@ void updateBattleScreen(const RenderTexture2D* texture) {
             battleOptions.timer = 0;
             battleOptions.state = DEALING_DAMAGE;
 
-            // TODO: sfx attack.wav
+            PlaySound(sound_attack);
         }
     } else if (battleOptions.state == DEALING_DAMAGE) {
         if (battleOptions.timer >= DEALING_DAMAGE_LENGTH) {
@@ -88,10 +110,10 @@ void updateBattleScreen(const RenderTexture2D* texture) {
             battleOptions.state = MOVE_HEALTHBAR;
 
             setButtons(NULL, 0);
-            // TODO: sfx damage_enemy.wav
+            PlaySound(sound_damage_enemy);
         }
     } else if (battleOptions.state == MOVE_HEALTHBAR) {
-        if (battleOptions.timer >= 1) {
+        if (battleOptions.timer >= RENDERING_DAMAGE_LENGTH) {
             battleOptions.timer = 0;
             battleOptions.state = ENEMY;
 
@@ -105,6 +127,9 @@ void updateBattleScreen(const RenderTexture2D* texture) {
     } else if (battleOptions.state == ENEMY) {
         if (activeBattle.enemy.health < 0) {
             battleOptions.state = FINISHED;
+
+            end_battle();
+
         } else if (battleOptions.timer > BATTLE_BOUNDS_EXPAND_TIME) {
             if (player.invincibility_timer > 0) {
                 player.invincibility_timer -= frame_time;
@@ -198,13 +223,17 @@ void drawBattleScreen(const RenderTexture2D* texture) {
             font_size, RED, 3, BLACK
         );
 
-        int maxHealth = activeBattle.enemy.max_health;
-        int currentHealth = activeBattle.enemy.health;
-        int newHealth = currentHealth - battleOptions.last_damage;
-        int difference = currentHealth - newHealth;
+        float maxHealth = activeBattle.enemy.max_health;
+        float currentHealth = activeBattle.enemy.health;
 
-        int healthBarWidth = 100;
-        int renderWitdh = healthBarWidth * ((currentHealth - difference) / maxHealth);
+        float renderHealth = currentHealth - (battleOptions.last_damage * (battleOptions.timer / CALCULATING_DAMAGE_LENGTH));
+
+        float healthBarWidth = 100;
+        float renderWitdh = healthBarWidth * (renderHealth / maxHealth);
+
+        DrawRectangleLinesEx((Rectangle) {pos.x - healthBarWidth / 2, pos.y + font_size + 2, healthBarWidth, 10}, 1, WHITE);
+        DrawRectangle(pos.x - healthBarWidth / 2, pos.y + font_size + 2, (int)healthBarWidth, 10, DARKGRAY);
+        DrawRectangle(pos.x - healthBarWidth / 2, pos.y + font_size + 2, (int)renderWitdh, 10, RED);
 
     } else if (battleOptions.state == ENEMY) {
         const int line_width = 3;
@@ -252,6 +281,10 @@ void start_battle(Battle battle) {
 void end_battle() {
     battle_buttons[0].text = "Continue";
     battle_buttons[0].onClick = end_battle_button;
+    setButtons(battle_buttons, 1);
+
+    SetMusicVolume(activeBattle.enemy.music, 0.4f);
+    PlaySound(sound_victory);
 }
 
 void battle_attack() {
@@ -274,7 +307,7 @@ void battle_attack() {
         battleOptions.state = DEALING_DAMAGE;
 
         setButtons(NULL, 0);
-        // TODO: sfx attack.wav
+        PlaySound(sound_attack);
     }
 }
 

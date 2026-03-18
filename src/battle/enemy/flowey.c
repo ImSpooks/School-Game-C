@@ -8,11 +8,16 @@ Texture2D enemy_flowey_projectile_texture;
 
 void enemy_flowey_initialize(Enemy* enemy) {
     enemy->texture = LoadTexture("assets/textures/enemies/flowey.png");
-    enemy_flowey_projectile_texture = LoadTexture("assets/textures/enemies/flowey_projectile.png");
+    enemy->music = LoadMusicStream("assets/music/boss/flowey.ogg");
+    enemy->music.looping = true;
+
+    enemy_flowey_projectile_texture = LoadTexture("assets/textures/enemies/projectile/flowey.png");
 }
 
 void enemy_flowey_unload(Enemy* enemy) {
     UnloadTexture(enemy->texture);
+    UnloadMusicStream(enemy->music);
+
     UnloadTexture(enemy_flowey_projectile_texture);
 }
 

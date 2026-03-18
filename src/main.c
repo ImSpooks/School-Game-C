@@ -26,6 +26,8 @@ int renderHeight = screenHeight * (720 / screenHeight);
 int main(void) {
     InitWindow(renderWidth, renderHeight, "Adventure Game");
 
+    InitAudioDevice();
+
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 
     // The target's height is flipped (in the source Rectangle), due to OpenGL reasons
@@ -104,7 +106,8 @@ int main(void) {
         dialogueAllocated = 0;
     }
 
-    vector_free(player.inventory);
+    if (vector_size(player.inventory) > 0)
+        vector_free(player.inventory);
 
     CloseWindow();
 

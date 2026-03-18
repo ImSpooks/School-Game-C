@@ -24,14 +24,55 @@ bool swappingLevel = false;
 bool fadeIn = false;
 static float timer = 0;
 
+Music music_forest;
+Music music_village;
+
+Music* music_current = NULL;
+
+
+
 void initializeGameScreen() {
-    setLevel(&levelStart);
+    music_forest = LoadMusicStream("assets/music/levels/forest.ogg");
+    music_village = LoadMusicStream("assets/music/levels/village.ogg");
+
+    music_forest.looping = true;
+    music_village.looping = true;
+
+    levelStart.music = &music_forest;
+    levelForest1.music = &music_forest;
+    levelForest2.music = &music_forest;
+    levelForest3.music = &music_forest;
+    levelWizard1.music = &music_forest;
+    levelWizard2.music = &music_forest;
+    levelWizard3.music = &music_forest;
+
+    levelVillage1.music = &music_village;
+    levelVillage2.music = &music_village;
+    levelVillage3.music = &music_village;
+    levelVillage4.music = &music_village;
+
+
+    if (currentLevel == NULL) {
+        setLevel(&levelStart);
+    } else {
+        currentLevel->load();
+        music_current = currentLevel->music;
+    }
+
 }
 
 void unloadGameScreen() {
     if (currentLevel != NULL) {
         currentLevel->unload();
     }
+
+    if (music_current != NULL) {
+        StopMusicStream(*music_current);
+        music_current = NULL;
+    }
+
+    UnloadMusicStream(music_forest);
+    UnloadMusicStream(music_village);
 }
 
 void drawGameScreen(const RenderTexture2D* texture) {
@@ -56,6 +97,9 @@ void drawGameScreen(const RenderTexture2D* texture) {
 }
 
 void updateGameScreen(const RenderTexture2D* texture) {
+    if (music_current != NULL)
+        UpdateMusicStream(*music_current);
+
     if (swappingLevel) {
         timer += GetFrameTime();
 
@@ -102,6 +146,24 @@ void setLevel(Level* level) {
 
     currentLevel = level;
     level->load();
+
+    if (music_current == NULL) {
+        music_current = level->music;
+        if (music_current != NULL)
+            PlayMusicStream(*music_current);
+    } else {
+        if (music_current != level->music) {
+            StopMusicStream(*music_current);
+
+            music_current = level->music;
+            if (music_current != NULL)
+                PlayMusicStream(*music_current);
+        } else {
+            PlayMusicStream(*music_current);
+        }
+    }
+    if (music_current != NULL)
+
 
     if (prevLevel != NULL && prevLevel != currentLevel) {
         prevLevel->unload();

@@ -67,104 +67,108 @@ void tickButtons(const RenderTexture2D *texture) {
     const int middle = texture->texture.width / 2;
     const Vector2 mousePos = getScaledMousePos();
 
-    int *widths = malloc(button_count * sizeof(int));
+    if (button_count > 0) {
+        int *widths = malloc(button_count * sizeof(int));
 
-    int totalWidth = 0;
-    for (int i = 0; i < button_count; i++) {
-        if (buttons[i].hidden) {
-            widths[i] = 0;
-            continue;
-        }
-        const int textWidth = MeasureText(buttons[i].text, BUTTON_FONT_SIZE);
-        widths[i] = textWidth + BUTTON_PADDING_X * 2;
-        totalWidth += widths[i];
-    }
-    totalWidth += (button_count - 1) * BUTTON_SPACING;
-
-    int startX = middle - totalWidth / 2;
-    const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
-
-    for (int i = 0; i < button_count; i++) {
-        const int width = widths[i];
-        if (width == 0) {
-            continue;
-        }
-        const Rectangle rect = (Rectangle){
-            (float) startX, (float) y - BUTTON_PADDING_Y, (float) width,
-            (float) BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2
-        };
-
-        Button *btn = buttons + i;
-        btn->hover = CheckCollisionPointRec(mousePos, rect);
-
-        if (btn->hover) {
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && btn->onClick != NULL) {
-                btn->onClick();
+        int totalWidth = 0;
+        for (int i = 0; i < button_count; i++) {
+            if (buttons[i].hidden) {
+                widths[i] = 0;
+                continue;
             }
+            const int textWidth = MeasureText(buttons[i].text, BUTTON_FONT_SIZE);
+            widths[i] = textWidth + BUTTON_PADDING_X * 2;
+            totalWidth += widths[i];
+        }
+        totalWidth += (button_count - 1) * BUTTON_SPACING;
 
-            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-                btn->pressed = true;
-            } else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+        int startX = middle - totalWidth / 2;
+        const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
+
+        for (int i = 0; i < button_count; i++) {
+            const int width = widths[i];
+            if (width == 0) {
+                continue;
+            }
+            const Rectangle rect = (Rectangle){
+                (float) startX, (float) y - BUTTON_PADDING_Y, (float) width,
+                (float) BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2
+            };
+
+            Button *btn = buttons + i;
+            btn->hover = CheckCollisionPointRec(mousePos, rect);
+
+            if (btn->hover) {
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && btn->onClick != NULL) {
+                    btn->onClick();
+                }
+
+                if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                    btn->pressed = true;
+                } else if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+                    btn->pressed = false;
+                }
+            } else if (btn->pressed && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
                 btn->pressed = false;
             }
-        } else if (btn->pressed && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            btn->pressed = false;
-        }
 
-        startX += width + BUTTON_SPACING;
+            startX += width + BUTTON_SPACING;
+        }
+        free(widths);
     }
-    free(widths);
 }
 
 void renderButtons(const RenderTexture2D *texture) {
-    const int middle = texture->texture.width / 2;
-    int *widths = malloc(button_count * sizeof(int));
+    if (button_count > 0) {
+        const int middle = texture->texture.width / 2;
+        int *widths = malloc(button_count * sizeof(int));
 
-    int totalWidth = 0;
-    for (int i = 0; i < button_count; i++) {
-        if (buttons[i].hidden) {
-            widths[i] = 0;
-            continue;
+        int totalWidth = 0;
+        for (int i = 0; i < button_count; i++) {
+            if (buttons[i].hidden) {
+                widths[i] = 0;
+                continue;
+            }
+            const int textWidth = MeasureText(buttons[i].text, BUTTON_FONT_SIZE);
+            widths[i] = textWidth + BUTTON_PADDING_X * 2;
+            totalWidth += widths[i];
         }
-        const int textWidth = MeasureText(buttons[i].text, BUTTON_FONT_SIZE);
-        widths[i] = textWidth + BUTTON_PADDING_X * 2;
-        totalWidth += widths[i];
+        totalWidth += (button_count - 1) * BUTTON_SPACING;
+
+        int startX = middle - totalWidth / 2;
+        const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
+
+        for (int i = 0; i < button_count; i++) {
+            const int width = widths[i];
+            if (width == 0) {
+                continue;
+            }
+            const Rectangle rect = (Rectangle){
+                (float) startX, (float) y - BUTTON_PADDING_Y, (float) width,
+                (float) BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2
+            };
+
+            if (buttons[i].pressed) {
+                DrawRectangleRec(rect, BUTTON_BACKGROUND_PRESS);
+                DrawRectangleLinesEx(rect, 2, BUTTON_BORDER_BACKGROUND_PRESS);
+            } else if (buttons[i].hover) {
+                DrawRectangleRec(rect, BUTTON_BACKGROUND_HOVER);
+                DrawRectangleLinesEx(rect, 2, BUTTON_BORDER_BACKGROUND_HOVER);
+            } else {
+                DrawRectangleRec(rect, BUTTON_BACKGROUND);
+                DrawRectangleLinesEx(rect, 2, BUTTON_BORDER_BACKGROUND);
+            }
+
+            const int textWidth = MeasureText(buttons[i].text, BUTTON_FONT_SIZE);
+            const int textX = startX + (width - textWidth) / 2;
+            const int textY = y - (BUTTON_FONT_SIZE / 2) + (BUTTON_PADDING_Y);
+
+            DrawText(buttons[i].text, textX, textY, BUTTON_FONT_SIZE, BLACK);
+
+            startX += width + BUTTON_SPACING;
+        }
+        free(widths);
     }
-    totalWidth += (button_count - 1) * BUTTON_SPACING;
-
-    int startX = middle - totalWidth / 2;
-    const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
-
-    for (int i = 0; i < button_count; i++) {
-        const int width = widths[i];
-        if (width == 0) {
-            continue;
-        }
-        const Rectangle rect = (Rectangle){
-            (float) startX, (float) y - BUTTON_PADDING_Y, (float) width,
-            (float) BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2
-        };
-
-        if (buttons[i].pressed) {
-            DrawRectangleRec(rect, BUTTON_BACKGROUND_PRESS);
-            DrawRectangleLinesEx(rect, 2, BUTTON_BORDER_BACKGROUND_PRESS);
-        } else if (buttons[i].hover) {
-            DrawRectangleRec(rect, BUTTON_BACKGROUND_HOVER);
-            DrawRectangleLinesEx(rect, 2, BUTTON_BORDER_BACKGROUND_HOVER);
-        } else {
-            DrawRectangleRec(rect, BUTTON_BACKGROUND);
-            DrawRectangleLinesEx(rect, 2, BUTTON_BORDER_BACKGROUND);
-        }
-
-        const int textWidth = MeasureText(buttons[i].text, BUTTON_FONT_SIZE);
-        const int textX = startX + (width - textWidth) / 2;
-        const int textY = y - (BUTTON_FONT_SIZE / 2) + (BUTTON_PADDING_Y);
-
-        DrawText(buttons[i].text, textX, textY, BUTTON_FONT_SIZE, BLACK);
-
-        startX += width + BUTTON_SPACING;
-    }
-    free(widths);
 }
 
 void setButtons(Button *btns, int count) {
