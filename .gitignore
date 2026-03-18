@@ -2,5 +2,6 @@ vcpkg_installed
 build
 cmake-build-debug
 cmake-build-release
+out
 *.iml
 .idea

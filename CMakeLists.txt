@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 4.1)
 
-project(TestRaylib LANGUAGES C)
+project(SchoolGameC LANGUAGES C)
 
-find_package(raylib CONFIG REQUIRED)
+include(FetchContent)
+FetchContent_Declare(raylib GIT_REPOSITORY "https://github.com/raysan5/raylib.git")
+FetchContent_MakeAvailable(raylib)
 
 
 # Create the executable target first
-add_executable(TestRaylib
+add_executable(SchoolGameC
         src/main.c
         src/objects.h
         src/level/level.h
@@ -45,20 +47,6 @@ add_library(c-vector lib/c-vector/vec.c lib/c-vector/vec.h)
 include_directories(${CMAKE_SOURCE_DIR}/lib/c-vector)
 
 # Link raylib to the correct target
-target_link_libraries(TestRaylib PRIVATE raylib c-vector)
+target_link_libraries(SchoolGameC raylib c-vector)
 
-
-set(ASSETS_SOURCE_DIR "${CMAKE_SOURCE_DIR}/assets")
-set(ASSETS_DEST_DIR "${CMAKE_BINARY_DIR}/assets")
-
-file(GLOB_RECURSE ASSET_FILES RELATIVE "${ASSETS_SOURCE_DIR}" "${ASSETS_SOURCE_DIR}/*")
-
-foreach(ASSET IN LISTS ASSET_FILES)
-    get_filename_component(ASSET_DIR "${ASSET}" PATH)
-    add_custom_command(TARGET TestRaylib POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${ASSETS_DEST_DIR}/${ASSET_DIR}"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${ASSETS_SOURCE_DIR}/${ASSET}" "${ASSETS_DEST_DIR}/${ASSET}"
-            COMMENT "Copying asset: ${ASSET}"
-    )
-endforeach()
-
+set_target_properties(SchoolGameC PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/out)
