@@ -58,6 +58,9 @@ void initializeGameScreen() {
     } else {
         currentLevel->load();
         music_current = currentLevel->music;
+        if (!IsMusicStreamPlaying(*music_current)){
+            PlayMusicStream(*music_current);
+        }
     }
 
 }
@@ -143,10 +146,15 @@ void setLevel(Level* level) {
         return;
     }
 
-    const Level* prevLevel = currentLevel;
+    if (currentLevel != NULL && currentLevel != level) {
+        currentLevel->unload();
+        printf("unloading level %p\n", currentLevel);
+    }
 
     currentLevel = level;
     level->load();
+
+    printf("loading level %p\n", level);
 
     if (music_current == NULL) {
         music_current = level->music;
@@ -162,12 +170,6 @@ void setLevel(Level* level) {
         } else if (!IsMusicStreamPlaying(*music_current)){
             PlayMusicStream(*music_current);
         }
-    }
-    if (music_current != NULL)
-
-
-    if (prevLevel != NULL && prevLevel != currentLevel) {
-        prevLevel->unload();
     }
 }
 

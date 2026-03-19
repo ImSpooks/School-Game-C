@@ -2,11 +2,12 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <raymath.h>
 
 #include "../../globals.h"
+#include "../../items/items.h"
 #include "enemy.h"
 #include "vec.h"
-#include "../../../cmake-build-release/_deps/raylib-src/src/raymath.h"
 #include "../../player/player.h"
 #include "../../screen/screen.h"
 
@@ -18,6 +19,7 @@ Rectangle flowey_projectile_hitbox(Projectile *projectile);
 
 void enemy_flowey_initialize(Enemy *enemy) {
     enemy->texture = LoadTexture("assets/textures/enemies/flowey.png");
+
     enemy->music = LoadMusicStream("assets/music/boss/flowey.ogg");
     enemy->music.looping = true;
 
@@ -100,12 +102,20 @@ bool enemy_flowey_attack(Projectile **projectiles, int type, float timer, int tu
 
     }
 
-    return timer > 0.2f * (float) waves + 2.5f;
+    return timer > 0.25f && size == 0;
 }
 
-void enemy_flowey_defeat() {
+void enemy_flowey_pre_defeat() {
     player.flags.boss_flowey = true;
-    setDialogue("Farmer Johan: As promised, I'll hand over the 50 gold.");
+
+    Item* item = vector_add_dst(&player.inventory);
+    item->type = COIN;
+    item->texture = &item_texture_coin;
+    item->value = 1;
+}
+
+void enemy_flowey_post_defeat() {
+    setDialogue("Farmer Johan: As promised, I'll hand over the golden coin.");
 }
 
 void spawn_flowey_projectile(Projectile **projectiles, int x, int y) {
@@ -137,5 +147,5 @@ void flowey_projectile_draw(Projectile *projectile) {
 }
 
 Rectangle flowey_projectile_hitbox(Projectile *projectile) {
-    return (Rectangle){projectile->position.x, projectile->position.y, projectile->texture->width, projectile->texture->height};
+    return (Rectangle){projectile->position.x, projectile->position.y, projectile->texture->width / 2, projectile->texture->height};
 }

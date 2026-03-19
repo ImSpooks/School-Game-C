@@ -3,9 +3,9 @@
 
 #include "level.h"
 #include "../hud.h"
-#include "../battle/battle.h"
 #include "../screen/game_screen.h"
 #include "../player/player.h"
+#include "../battle/battle.h"
 #include "../battle/enemy/flowey.h"
 #include "../screen/battle_screen.h"
 
@@ -74,7 +74,8 @@ void village3_battleFlowey() {
             .initialize = enemy_flowey_initialize,
             .unload = enemy_flowey_unload,
             .attack = enemy_flowey_attack,
-            .defeat = enemy_flowey_defeat
+            .pre_defeat = enemy_flowey_pre_defeat,
+            .post_defeat = enemy_flowey_post_defeat
         },
     };
 

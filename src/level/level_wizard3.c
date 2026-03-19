@@ -2,7 +2,9 @@
 #include <stdlib.h>
 
 #include "level.h"
+#include "vec.h"
 #include "../hud.h"
+#include "../player/player.h"
 #include "../screen/game_screen.h"
 
 void loadLevelWizard3();
@@ -25,8 +27,7 @@ void loadLevelWizard3() {
 
     setDialogue("This looks like a neat place");
 
-    if (false) {
-        // TODO potion inventory
+    if (contains_item(POTION)) {
         wizard3_buttons = (Button *) malloc(sizeof(Button) * 1);
         wizard3_buttons[0] = (Button){
             .text = "Go back",
@@ -57,7 +58,11 @@ void unloadLevelWizard3() {
 void wizard3_pickupPotion() {
     setDialogue("Oh, a potion! Just what I needed! Lets go back to the Angel.");
 
-    // TODO pickup potion
+    Item* cloak = vector_add_dst(&player.inventory);
+    cloak->type = POTION;
+    cloak->texture = &item_texture_heal_potion;
+    cloak->value = 1;
+
     reloadLevel();
 }
 

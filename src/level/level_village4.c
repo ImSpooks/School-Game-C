@@ -2,8 +2,10 @@
 #include <stdlib.h>
 
 #include "level.h"
+#include "vec.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
+#include "../player/player.h"
 
 void loadLevelVillage4();
 void unloadLevelVillage4();
@@ -44,7 +46,14 @@ void unloadLevelVillage4() {
 }
 
 void village4_sellItem() {
-    if (false) { // TODO check for any valuables
+    if (contains_item(SELLABLE)) { // TODO check for any valuables
+        remove_item_type(SELLABLE);
+
+        Item* item = vector_add_dst(&player.inventory);
+        item->type = COIN;
+        item->texture = &item_texture_coin;
+        item->value = 1;
+
         setDialogue("Merchant Andre: Thanks for selling me that item, here's a golden coin!");
     } else {
         setDialogue("You don't have any valuables to sell");

@@ -2,8 +2,10 @@
 #include <stdlib.h>
 
 #include "level.h"
+#include "vec.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
+#include "../player/player.h"
 
 void loadLevelForest3();
 void unloadLevelForest3();
@@ -24,17 +26,18 @@ void loadLevelForest3() {
 
     forest3_buttons = (Button*) malloc(sizeof(Button) * 2);
 
-    if (true) { // TODO we have paid the pirate
+    if (player.flags.paid_pirate) {
         forest3_buttons[0] = (Button) {
             .text = "Go to the wizard",
             .onClick = forest3_toWizard
         };
+        setDialogue("Pirate: What are ya doin' here pal?");
     } else {
-        if (false) { // TODO has gold coin
+        if (contains_item(COIN)) {
             setDialogueMulti((char*[]) {
                 "Pirate: Hello pal, are you trying to go on?",
-                "You can only pass us by paying us atleast",
-                "10 gold, so what are you waiting for?"
+                "You can only pass us by paying us a",
+                "golden coin, so what are you waiting for?"
             }, 3);
         } else {
             setDialogueMulti((char*[]) {
@@ -66,11 +69,20 @@ void unloadLevelForest3() {
 }
 
 void forest3_payPirate() {
-    // TODO has gold coin
-    if (false) {
-        // TODO pay pirate
+    if (contains_item(COIN)) {
+        player.flags.paid_pirate = true;
         reloadLevel();
         setDialogueMulti((char*[]) {"Pirate: That is what I call a good deal, but take this.", "It will protect you against some monsters.", "And I'll give you this potion as well", "it'll boost your attack."}, 4);
+
+        Item* cloak = vector_add_dst(&player.inventory);
+        cloak->type = DEFENCE;
+        cloak->texture = &item_texture_cloak;
+        cloak->value = 18;
+
+        Item* potion = vector_add_dst(&player.inventory);
+        potion->type = DEFENCE;
+        potion->texture = &item_texture_strength_potion;
+        potion->value = 17;
     } else {
         setDialogue("You do not have a golden coin.");
     }

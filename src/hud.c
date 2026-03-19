@@ -6,6 +6,8 @@
 #include <stdlib.h>
 
 #include "globals.h"
+#include "vec.h"
+#include "player/player.h"
 #include "util/util.h"
 
 #define BUTTON_FONT_SIZE 8
@@ -34,6 +36,7 @@ struct Dialogue dialogue;
 void tickButtons(const RenderTexture2D *texture);
 
 void renderButtons(const RenderTexture2D *texture);
+void renderItems(const RenderTexture2D *texture);
 
 void updateHud(const RenderTexture2D *texture) {
     if (!hud.render_hud) {
@@ -54,11 +57,26 @@ void drawHud(const RenderTexture2D *texture) {
         renderButtons(texture);
     }
 
+    if (hud.render_items) {
+        renderItems(texture);
+    }
+
+    if (hud.render_health) {
+        const int barWidth = 100;
+        const int barHeight = 12;
+        const int x = 8;
+        const int y = SCREEN_HEIGHT - 8 - barHeight;
+
+        DrawRectangle(x, y, barWidth, barHeight, GRAY);
+        DrawRectangle(x, y, (int)((player.health / (float)player.maxHealth) * barWidth), barHeight, GREEN);
+        DrawRectangleLines(x, y, barWidth, barHeight, BLACK);
+    }
+
     if (dialogue.lines != NULL) {
         for (int i = 0; i < dialogue.lineCount; i++) {
             const char* text = *(dialogue.lines + i);
             const int width = MeasureText(text, 8);
-            const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2) - ((dialogue.lineCount - i) * (DIALOGUE_FONT_SIZE + DIALOGUE_SPACING)) - BUTTON_SPACING;
+            const int y = SCREEN_HEIGHT - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2) - ((dialogue.lineCount - i) * (DIALOGUE_FONT_SIZE + DIALOGUE_SPACING)) - BUTTON_SPACING;
             DrawOutlinedText(text, (SCREEN_WIDTH / 2) - (width / 2), y, DIALOGUE_FONT_SIZE, WHITE, 1, BLACK);
         }
     }
@@ -84,7 +102,7 @@ void tickButtons(const RenderTexture2D *texture) {
         totalWidth += (button_count - 1) * BUTTON_SPACING;
 
         int startX = middle - totalWidth / 2;
-        const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
+        const int y = SCREEN_HEIGHT - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
 
         for (int i = 0; i < button_count; i++) {
             const int width = widths[i];
@@ -137,7 +155,7 @@ void renderButtons(const RenderTexture2D *texture) {
         totalWidth += (button_count - 1) * BUTTON_SPACING;
 
         int startX = middle - totalWidth / 2;
-        const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
+        const int y = SCREEN_HEIGHT - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2);
 
         for (int i = 0; i < button_count; i++) {
             const int width = widths[i];
@@ -169,6 +187,23 @@ void renderButtons(const RenderTexture2D *texture) {
             startX += width + BUTTON_SPACING;
         }
         free(widths);
+    }
+}
+
+void renderItems(const RenderTexture2D *texture) {
+    size_t size = vector_size(player.inventory);
+
+    int offsetX = 8;
+    int offsetY = 8;
+
+    const int outline = 2;
+
+    for (int i = 0; i < size; i++) {
+        Item* item = player.inventory + i;
+
+        DrawTexture(*item->texture, offsetX, offsetY, WHITE);
+
+        offsetX += 8 + item->texture->width;
     }
 }
 

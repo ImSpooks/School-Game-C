@@ -6,6 +6,8 @@ struct HUDOptions {
     bool render_hud;
     bool render_background;
     bool render_buttons;
+    bool render_items;
+    bool render_health;
 };
 
 struct Dialogue {

@@ -4,6 +4,10 @@
 #include "level.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
+#include "../player/player.h"
+#include "../battle/battle.h"
+#include "../battle/enemy/wizard.h"
+#include "../screen/battle_screen.h"
 
 void loadLevelWizard2();
 void unloadLevelWizard2();
@@ -24,7 +28,7 @@ void loadLevelWizard2() {
 
     wizzard2_buttons = (Button*) malloc(sizeof(Button) * 2);
 
-    if (true) { // TODO boss wizard defeated
+    if (player.flags.boss_wizard) { // TODO boss wizard defeated
         setDialogue("This looks like a neat place");
         wizzard2_buttons[0] = (Button) {
             .text = "Go upstairs",
@@ -52,7 +56,23 @@ void unloadLevelWizard2() {
 }
 
 void wizard2_battleWizard() {
+    Battle battle = {
+        .enemy = (Enemy) {
+            .max_health = 2500,
+            .health = 1250,
+            .attack_stat = 16,
+            .defence_stat = 10,
+            .total_attacks = 4,
 
+            .initialize = enemy_wizard_initialize,
+            .unload = enemy_wizard_unload,
+            .attack = enemy_wizard_attack,
+            .pre_defeat = enemy_wizard_pre_defeat,
+            .post_defeat = enemy_wizard_post_defeat
+        },
+    };
+
+    start_battle(battle);
 }
 
 void wizard2_goUpstairs() {

@@ -2,9 +2,11 @@
 
 #include <math.h>
 #include <raylib.h>
+#include <raymath.h>
 #include <stddef.h>
 #include <stdio.h>
 
+#include "game_screen.h"
 #include "../globals.h"
 #include "screen.h"
 #include "vec.h"
@@ -31,6 +33,7 @@ Screen battleScreen = {
 
 Battle activeBattle;
 BattleOptions battleOptions;
+static bool pendingEndBattle = false;
 
 Texture2D texture_damage_bar;
 Texture2D texture_damage_slider;
@@ -47,6 +50,7 @@ Sound sound_victory;
 Button* battle_buttons;
 
 void initializeBattleScreen() {
+    pendingEndBattle = false;
     setDialogue("This is the battle screen");
 
     texture_damage_bar = LoadTexture("assets/textures/ui/damage_bar.png");
@@ -71,12 +75,19 @@ void initializeBattleScreen() {
 
     setButtons(battle_buttons, 1);
 
-
     PlayMusicStream(activeBattle.enemy.music);
+
+    hud.render_items = false;
+    hud.render_health = true;
 }
 
 void unloadBattleScreen() {
-    StopMusicStream(activeBattle.enemy.music);
+    if (IsMusicStreamPlaying(activeBattle.enemy.music))
+        StopMusicStream(activeBattle.enemy.music);
+    if (IsMusicValid(activeBattle.enemy.music2) && IsMusicStreamPlaying(activeBattle.enemy.music2))
+        StopMusicStream(activeBattle.enemy.music2);
+
+    printf("UNLOADING BATTLESCREEN");
 
     UnloadTexture(texture_damage_bar);
     UnloadTexture(texture_damage_slider);
@@ -87,14 +98,49 @@ void unloadBattleScreen() {
     UnloadSound(sound_damage_enemy);
     UnloadSound(sound_damage_take);
 
+    UnloadSound(sound_victory);
+
     activeBattle.enemy.unload(&activeBattle.enemy);
-    vector_free(activeBattle.enemy.projectiles);
+    if (battleOptions.state == ENEMY) {
+        // Should only happen on force close
+        for (int i = 0; i < vector_size(activeBattle.enemy.projectiles); i++) {
+            Projectile* projectile = activeBattle.enemy.projectiles + i;
+            free(projectile->data);
+        }
+        vector_free(activeBattle.enemy.projectiles);
+    }
 
     free(battle_buttons);
+
+    hud.render_items = true;
+    hud.render_health = false;
 }
 
 void updateBattleScreen(const RenderTexture2D* texture) {
-    UpdateMusicStream(activeBattle.enemy.music);
+    if (pendingEndBattle) {
+        pendingEndBattle = false;
+        activeBattle.enemy.pre_defeat();
+        setScreen(&gameScreen);
+        activeBattle.enemy.post_defeat();
+        return;
+    }
+
+    if (!IsMusicValid(activeBattle.enemy.music2)) {
+        UpdateMusicStream(activeBattle.enemy.music);
+    } else {
+        if (IsMusicStreamPlaying(activeBattle.enemy.music2)) {
+            UpdateMusicStream(activeBattle.enemy.music2);
+        } else {
+            if (!IsMusicStreamPlaying(activeBattle.enemy.music)) {
+                if (!IsMusicStreamPlaying(activeBattle.enemy.music2)) {
+                    StopMusicStream(activeBattle.enemy.music);
+                    PlayMusicStream(activeBattle.enemy.music2);
+                }
+            } else {
+                UpdateMusicStream(activeBattle.enemy.music);
+            }
+        }
+    }
 
     float frame_time = GetFrameTime();
 
@@ -125,18 +171,12 @@ void updateBattleScreen(const RenderTexture2D* texture) {
             player.position.y = BATTLE_BOUNDS_MIDDLE.y;
             player.invincibility_timer = 0;
 
-            activeBattle.enemy.projectiles = vector_create();
+            if (activeBattle.enemy.health > 0)
+                activeBattle.enemy.projectiles = vector_create();
         }
     } else if (battleOptions.state == ENEMY) {
-        if (activeBattle.enemy.health < 0) {
+        if (activeBattle.enemy.health <= 0) {
             battleOptions.state = FINISHED;
-
-            for (int i = 0; i < vector_size(activeBattle.enemy.projectiles); i++) {
-                Projectile* projectile = activeBattle.enemy.projectiles + i;
-                free(projectile->data);
-            }
-            vector_free(activeBattle.enemy.projectiles);
-
             end_battle();
 
         } else if (battleOptions.timer > BATTLE_BOUNDS_EXPAND_TIME) {
@@ -156,6 +196,10 @@ void updateBattleScreen(const RenderTexture2D* texture) {
                 player.position.x = player.position.x + (PLAYER_SPEED * frame_time);
             }
 
+            player.position.x = Clamp(player.position.x, BATTLE_BOUNDS.x + 8 + 3,
+                                      BATTLE_BOUNDS.x + BATTLE_BOUNDS.width - 8 - 3);
+            player.position.y = Clamp(player.position.y, BATTLE_BOUNDS.y + 8 + 3, BATTLE_BOUNDS.y + BATTLE_BOUNDS.height - 8 - 3);
+
             if (activeBattle.enemy.attack(&activeBattle.enemy.projectiles, battleOptions.enemy_attack, battleOptions.timer - BATTLE_BOUNDS_EXPAND_TIME, battleOptions.turn)) {
                 battleOptions.timer = 0;
                 battleOptions.state = ENEMY_FINISH;
@@ -169,23 +213,25 @@ void updateBattleScreen(const RenderTexture2D* texture) {
                 }
                 vector_free(activeBattle.enemy.projectiles);
             } else {
-                Rectangle playerHitbox = (Rectangle) {player.position.x - 16, player.position.y - 16, 32, 32};
+                Rectangle playerHitbox = (Rectangle) {player.position.x - 8, player.position.y - 8, 16, 16};
 
-                for (int i = 0; i < vector_size(activeBattle.enemy.projectiles); i++) {
+                for (int i = 0; i < (int)vector_size(activeBattle.enemy.projectiles); i++) {
                     Projectile* projectile = activeBattle.enemy.projectiles + i;
 
                     Rectangle hitbox = projectile->get_hitbox(projectile);
-                    if (battleOptions.state == ENEMY && player.invincibility_timer > 0) {
+
+                    // Remove projectiles outside of bounds
+                    if (!CheckCollisionRecs(hitbox, (Rectangle) {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}) || projectile->lifespan > 99) {
+                        free(projectile->data);
+                        vector_remove(activeBattle.enemy.projectiles, i--);
+                        continue;
+                    }
+
+                    if (player.invincibility_timer <= 0) {
                         if (CheckCollisionRecs(playerHitbox, hitbox)) {
                             damage_player(projectile, projectile->true_damage);
                             PlaySound(sound_damage_take);
                         }
-                    }
-
-                    // Remove projectiles outside of bounds
-                    if (!CheckCollisionRecs(hitbox, (Rectangle) {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT})) {
-                        free(projectile->data);
-                        vector_remove(activeBattle.enemy.projectiles, i--);
                     }
 
                     projectile->lifespan += frame_time;
@@ -216,7 +262,7 @@ void drawBattleScreen(const RenderTexture2D* texture) {
     }
 
     int y = 64 - (activeBattle.enemy.texture.height / 2);
-    if (y < 32) y = 32;
+    if (y < 16) y = 16;
 
     if (activeBattle.enemy.health > 0) {
         Vector2 pos = {640 / 2.0f - activeBattle.enemy.texture.width / 2.0f, y};
@@ -245,7 +291,7 @@ void drawBattleScreen(const RenderTexture2D* texture) {
         int font_size = 25;
         int width = MeasureText(text, font_size);
 
-        Vector2 pos = {(640 / 2) - (width / 2), y + activeBattle.enemy.texture.height / 4 * 3};
+        Vector2 pos = {(SCREEN_WIDTH / 2) - (width / 2), y + activeBattle.enemy.texture.height / 4 * 3};
 
         DrawOutlinedText(text,
             (int) (pos.x + ((double) rand() / (double) RAND_MAX - 0.5) * 4),
@@ -253,17 +299,19 @@ void drawBattleScreen(const RenderTexture2D* texture) {
             font_size, RED, 3, BLACK
         );
 
-        float maxHealth = activeBattle.enemy.max_health;
-        float currentHealth = activeBattle.enemy.health;
+        const float maxHealth = activeBattle.enemy.max_health;
+        const float currentHealth = activeBattle.enemy.health;
 
-        float renderHealth = currentHealth - (battleOptions.last_damage * (battleOptions.timer / CALCULATING_DAMAGE_LENGTH));
+        const float renderHealth = currentHealth - (battleOptions.last_damage * (battleOptions.timer / RENDERING_DAMAGE_LENGTH));
 
-        float healthBarWidth = 100;
+        const float healthBarWidth = 100;
         float renderWitdh = healthBarWidth * (renderHealth / maxHealth);
+        if (renderWitdh < 0)
+            renderWitdh = 0;
 
-        DrawRectangleLinesEx((Rectangle) {pos.x - healthBarWidth / 2 - 1, pos.y + font_size + 2 - 1, healthBarWidth + 2, 10 + 2}, 1, WHITE);
-        DrawRectangle(pos.x - healthBarWidth / 2, pos.y + font_size + 2, (int)healthBarWidth, 10, DARKGRAY);
-        DrawRectangle(pos.x - healthBarWidth / 2, pos.y + font_size + 2, (int)renderWitdh, 10, RED);
+        DrawRectangle((SCREEN_WIDTH / 2) - healthBarWidth / 2, pos.y + font_size + 2, (int)healthBarWidth, 12, DARKGRAY);
+        DrawRectangle((SCREEN_WIDTH / 2) - healthBarWidth / 2, pos.y + font_size + 2, (int)renderWitdh, 12, RED);
+        DrawRectangleLinesEx((Rectangle) {(SCREEN_WIDTH / 2) - healthBarWidth / 2, pos.y + font_size + 2, healthBarWidth, 12}, 1, BLACK);
 
     } else if (battleOptions.state == ENEMY) {
         const int line_width = 3;
@@ -334,6 +382,8 @@ void end_battle() {
     setButtons(battle_buttons, 1);
 
     SetMusicVolume(activeBattle.enemy.music, 0.4f);
+    if (IsMusicValid(activeBattle.enemy.music2))
+        SetMusicVolume(activeBattle.enemy.music2, 0.4f);
     PlaySound(sound_victory);
 }
 
@@ -348,10 +398,10 @@ void battle_attack() {
         float percent = battleOptions.timer / CALCULATING_DAMAGE_LENGTH; // 0 to 1 range, 0.5 is optimal damage
         float damage = sinf(percent * PI) * 15;
 
-        damage = damage * get_attack_stat() / powf((float)activeBattle.enemy.defence_stat, 1.75f);
+        damage = damage * get_attack_stat() / sqrtf(powf((float)activeBattle.enemy.defence_stat, 1.75f));
         damage = damage * (powf((float)battleOptions.turn / 10.0f, 2) + 1);
 
-        battleOptions.last_damage = damage;
+        battleOptions.last_damage = damage * 1;
 
         battleOptions.timer = 0;
         battleOptions.state = DEALING_DAMAGE;
@@ -362,6 +412,7 @@ void battle_attack() {
 }
 
 void end_battle_button() {
-    setScreen(&gameScreen);
-    activeBattle.enemy.defeat();
+    setButtons(NULL, 0);
+    // do stuff next frame
+    pendingEndBattle = true;
 }

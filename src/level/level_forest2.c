@@ -3,7 +3,11 @@
 
 #include "level.h"
 #include "../hud.h"
+#include "../player/player.h"
 #include "../screen/game_screen.h"
+#include "../battle/battle.h"
+#include "../battle/enemy/bear.h"
+#include "../screen/battle_screen.h"
 
 void loadLevelForest2();
 void unloadLevelForest2();
@@ -20,11 +24,14 @@ Level levelForest2 = {
 Button* forest2_buttons;
 
 void loadLevelForest2() {
-    levelForest2.texture = LoadTexture("assets/textures/levels/forest2.png");
+    if (player.flags.boss_bear)
+        levelForest2.texture = LoadTexture("assets/textures/levels/forest2_nobear.png");
+    else
+        levelForest2.texture = LoadTexture("assets/textures/levels/forest2_bear.png");
 
     forest2_buttons = (Button*) malloc(sizeof(Button) * 2);
 
-    if (true) { // TODO boss bear defeated
+    if (player.flags.boss_bear) { // TODO boss bear defeated
         setDialogueMulti((char*[]) {"Voiceover Pete: Alright, the bear is gone.", "You may now proceed safely."}, 2);
         forest2_buttons[0] = (Button) {
             .text = "Go forward",
@@ -59,7 +66,23 @@ void unloadLevelForest2() {
 }
 
 void forest2_attackBear() {
+    Battle battle = {
+        .enemy = (Enemy) {
+            .max_health = 250,
+            .health = 250,
+            .attack_stat = 2,
+            .defence_stat = 8,
+            .total_attacks = 3,
 
+            .initialize = enemy_bear_initialize,
+            .unload = enemy_bear_unload,
+            .attack = enemy_bear_attack,
+            .pre_defeat = enemy_bear_pre_defeat,
+            .post_defeat = enemy_bear_post_defeat
+        },
+    };
+
+    start_battle(battle);
 }
 
 void forest2_goForward() {

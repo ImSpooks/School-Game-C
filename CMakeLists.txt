@@ -11,7 +11,7 @@ FetchContent_MakeAvailable(raylib)
 # Create the executable target first
 add_executable(SchoolGameC
         src/main.c
-        src/objects.h
+        src/items/items.h
         src/level/level.h
         src/screen/title_screen.c
         src/screen/screen.h
@@ -38,12 +38,23 @@ add_executable(SchoolGameC
         src/player/player.c
         src/player/player.h
         src/battle/battle.h
+        src/battle/enemy/bear.c
+        src/battle/enemy/bear.h
         src/battle/enemy/enemy.h
+        src/battle/enemy/golem.c
+        src/battle/enemy/golem.h
+        src/battle/enemy/hawk.c
+        src/battle/enemy/hawk.h
         src/battle/enemy/projectile/projectile.h
         src/battle/enemy/flowey.c
         src/battle/enemy/flowey.h
         src/battle/enemy/projectile/projectile.c
+        src/battle/enemy/wizard.c
+        src/battle/enemy/wizard.h
         src/globals.h
+        src/items/items.c
+        src/asset_manager.c
+        src/asset_manager.h
 )
 
 add_library(c-vector lib/c-vector/vec.c lib/c-vector/vec.h)

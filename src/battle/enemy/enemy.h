@@ -12,6 +12,7 @@ typedef void (*enemy_unload_fn)(Enemy*);
 struct Enemy {
     Texture2D texture;
     Music music;
+    Music music2;
 
     float max_health;
     float health;
@@ -23,7 +24,8 @@ struct Enemy {
     enemy_initialize_fn initialize;
     enemy_unload_fn unload;
     bool (*attack)(Projectile** /*vector*/, int /*attack type*/, float /*timer*/, int /*turn*/); // returns true if attack is done
-    void (*defeat)(void);
+    void (*pre_defeat)(void);
+    void (*post_defeat)(void);
 
     Projectile* projectiles;
 };

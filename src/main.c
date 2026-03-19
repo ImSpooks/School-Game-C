@@ -21,6 +21,7 @@ void drawButtons();
 int renderWidth = SCREEN_WIDTH * (1280 / SCREEN_WIDTH);
 int renderHeight = SCREEN_HEIGHT * (720 / SCREEN_HEIGHT);
 
+int frame = 0;
 int main(void) {
     InitWindow(renderWidth, renderHeight, "Adventure Game");
 
@@ -39,10 +40,14 @@ int main(void) {
     hud.render_hud = true;
     hud.render_background = false;
     hud.render_buttons = true;
+    hud.render_items = true;
+    hud.render_health = false;
 
     player.inventory = vector_create();
     player.maxHealth = 100;
     player.health = player.maxHealth;
+
+    load_items();
 
     while (!WindowShouldClose()) {
         renderWidth = GetScreenWidth();
@@ -95,10 +100,13 @@ int main(void) {
         );
 
         EndDrawing();
+        frame++;
     }
     screen->unload();
 
     UnloadRenderTexture(screenRenderer);
+
+    unload_items();
 
     if (dialogue.lines != NULL && dialogueAllocated) {
         free(dialogue.lines);
@@ -118,15 +126,17 @@ void setScreen(Screen* newScreen) {
     if (newScreen == screen) {
         return;
     }
+    frame = 0;
 
-    const Screen* prevScreen = screen;
+    if (screen != NULL && screen != newScreen) {
+        screen->unload();
+        printf("unloading screen %p\n", screen);
+    }
 
     screen = newScreen;
     newScreen->initialize();
 
-    if (prevScreen != NULL && prevScreen != newScreen) {
-        prevScreen->unload();
-    }
+    printf("loading screen %p\n", newScreen);
 }
 
 void setDialogue(char* text) {

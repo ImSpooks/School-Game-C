@@ -2,8 +2,10 @@
 #include <stdlib.h>
 
 #include "level.h"
+#include "vec.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
+#include "../player/player.h"
 
 void loadLevelVillage2();
 void unloadLevelVillage2();
@@ -44,8 +46,15 @@ void unloadLevelVillage2() {
 }
 
 void village2_buySword() {
-    if (false) { // TODO check for enough coins
-        setDialogue("Blacksmith: Thanks for buying that sword, here's a golden coin!");
+    if (contains_item(COIN)) {
+        setDialogue("Blacksmith: Pleasure doing business.");
+
+        remove_item_type(COIN);
+        Item* item = vector_add_dst(&player.inventory);
+        item->type = ATTACK;
+        item->texture = &item_texture_sword;
+        item->value = 10;
+
     } else {
         setDialogueMulti((char*[]) {"Blacksmith Kukr: You don't have a golden coin to buy a sword.", "I've heard farmer Johan needs help and may reward you."}, 2);
     }

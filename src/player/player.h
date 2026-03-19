@@ -1,7 +1,7 @@
 #ifndef TESTRAYLIB_PLAYER_H
 #define TESTRAYLIB_PLAYER_H
 
-#include "../objects.h"
+#include "../items/items.h"
 
 #define PLAYER_SPEED 128
 
@@ -15,6 +15,7 @@ typedef struct PlayerFlags {
     bool boss_renoir;
 
     bool paid_pirate;
+    bool healed_angel;
 } PlayerFlags;
 
 typedef struct Player {
@@ -32,9 +33,8 @@ extern Player player;
 float get_attack_stat();
 float get_defence_stat();
 
-void add_item(Item item);
 void remove_item_index(int index);
-void remove_item_name(char* name);
-bool contains_item(char* name);
+void remove_item_type(ItemType type);
+bool contains_item(ItemType type);
 
 #endif //TESTRAYLIB_PLAYER_H
