@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "globals.h"
 #include "util/util.h"
 
 #define BUTTON_FONT_SIZE 8
@@ -58,13 +59,13 @@ void drawHud(const RenderTexture2D *texture) {
             const char* text = *(dialogue.lines + i);
             const int width = MeasureText(text, 8);
             const int y = 360 - (BUTTON_FONT_SIZE + BUTTON_PADDING_Y * 2) - ((dialogue.lineCount - i) * (DIALOGUE_FONT_SIZE + DIALOGUE_SPACING)) - BUTTON_SPACING;
-            DrawOutlinedText(text, (texture->texture.width / 2) - (width / 2), y, DIALOGUE_FONT_SIZE, WHITE, 1, BLACK);
+            DrawOutlinedText(text, (SCREEN_WIDTH / 2) - (width / 2), y, DIALOGUE_FONT_SIZE, WHITE, 1, BLACK);
         }
     }
 }
 
 void tickButtons(const RenderTexture2D *texture) {
-    const int middle = texture->texture.width / 2;
+    const int middle = SCREEN_WIDTH / 2;
     const Vector2 mousePos = getScaledMousePos();
 
     if (button_count > 0) {
@@ -120,7 +121,7 @@ void tickButtons(const RenderTexture2D *texture) {
 
 void renderButtons(const RenderTexture2D *texture) {
     if (button_count > 0) {
-        const int middle = texture->texture.width / 2;
+        const int middle = SCREEN_WIDTH / 2;
         int *widths = malloc(button_count * sizeof(int));
 
         int totalWidth = 0;

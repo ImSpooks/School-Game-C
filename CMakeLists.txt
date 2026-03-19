@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 4.1)
 
-project(SchoolGameC LANGUAGES C)
+set(CMAKE_C_STANDARD 99)
+project(SchoolGameC C)
 
 include(FetchContent)
 FetchContent_Declare(raylib GIT_REPOSITORY "https://github.com/raysan5/raylib.git")
@@ -41,6 +42,8 @@ add_executable(SchoolGameC
         src/battle/enemy/projectile/projectile.h
         src/battle/enemy/flowey.c
         src/battle/enemy/flowey.h
+        src/battle/enemy/projectile/projectile.c
+        src/globals.h
 )
 
 add_library(c-vector lib/c-vector/vec.c lib/c-vector/vec.h)
@@ -49,4 +52,5 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/c-vector)
 # Link raylib to the correct target
 target_link_libraries(SchoolGameC raylib c-vector)
 
-set_target_properties(SchoolGameC PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_CURRENT_SOURCE_DIR}/out)
+set_target_properties(SchoolGameC PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/out)
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_SOURCE_DIR}/out)

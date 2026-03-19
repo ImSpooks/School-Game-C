@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "../globals.h"
 #include "../hud.h"
 
 void initializeGameScreen();
@@ -79,7 +80,7 @@ void drawGameScreen(const RenderTexture2D* texture) {
     if (currentLevel != NULL) {
         DrawTexturePro(currentLevel->texture,
             (Rectangle) {0, 0, (float) currentLevel->texture.width, (float) currentLevel->texture.height},
-            (Rectangle) {0, 0, (float) texture->texture.width, (float) texture->texture.height},
+            (Rectangle) {0, 0, (float) SCREEN_WIDTH, (float) SCREEN_HEIGHT},
             (Vector2) {0, 0},
             0.0f,
             WHITE);
@@ -92,7 +93,7 @@ void drawGameScreen(const RenderTexture2D* texture) {
         } else {
             alpha = 255 - (int) ((timer * 2) / TRANSITION_LENGTH * 255);
         }
-        DrawRectangle(0, 0, texture->texture.width, texture->texture.height, (Color) {0, 0, 0, (unsigned char) alpha});
+        DrawRectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color) {0, 0, 0, (unsigned char) alpha});
     }
 }
 
@@ -158,7 +159,7 @@ void setLevel(Level* level) {
             music_current = level->music;
             if (music_current != NULL)
                 PlayMusicStream(*music_current);
-        } else {
+        } else if (!IsMusicStreamPlaying(*music_current)){
             PlayMusicStream(*music_current);
         }
     }

@@ -22,7 +22,7 @@ struct Enemy {
 
     enemy_initialize_fn initialize;
     enemy_unload_fn unload;
-    bool (*attack)(Projectile* /*vector*/, int /*attack type*/, float /*timer*/, int /*turn*/); // returns true if attack is done
+    bool (*attack)(Projectile** /*vector*/, int /*attack type*/, float /*timer*/, int /*turn*/); // returns true if attack is done
     void (*defeat)(void);
 
     Projectile* projectiles;

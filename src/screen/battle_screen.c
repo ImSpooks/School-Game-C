@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#include "../globals.h"
 #include "screen.h"
 #include "vec.h"
 #include "../battle/battle.h"
@@ -86,8 +87,8 @@ void unloadBattleScreen() {
     UnloadSound(sound_damage_enemy);
     UnloadSound(sound_damage_take);
 
-    vector_free(activeBattle.enemy.projectiles);
     activeBattle.enemy.unload(&activeBattle.enemy);
+    vector_free(activeBattle.enemy.projectiles);
 
     free(battle_buttons);
 }
@@ -123,10 +124,18 @@ void updateBattleScreen(const RenderTexture2D* texture) {
             player.position.x = BATTLE_BOUNDS_MIDDLE.x;
             player.position.y = BATTLE_BOUNDS_MIDDLE.y;
             player.invincibility_timer = 0;
+
+            activeBattle.enemy.projectiles = vector_create();
         }
     } else if (battleOptions.state == ENEMY) {
         if (activeBattle.enemy.health < 0) {
             battleOptions.state = FINISHED;
+
+            for (int i = 0; i < vector_size(activeBattle.enemy.projectiles); i++) {
+                Projectile* projectile = activeBattle.enemy.projectiles + i;
+                free(projectile->data);
+            }
+            vector_free(activeBattle.enemy.projectiles);
 
             end_battle();
 
@@ -147,21 +156,47 @@ void updateBattleScreen(const RenderTexture2D* texture) {
                 player.position.x = player.position.x + (PLAYER_SPEED * frame_time);
             }
 
-
-            if (activeBattle.enemy.attack(activeBattle.enemy.projectiles, battleOptions.enemy_attack, battleOptions.timer - BATTLE_BOUNDS_EXPAND_TIME, battleOptions.turn)) {
+            if (activeBattle.enemy.attack(&activeBattle.enemy.projectiles, battleOptions.enemy_attack, battleOptions.timer - BATTLE_BOUNDS_EXPAND_TIME, battleOptions.turn)) {
                 battleOptions.timer = 0;
-                battleOptions.state = PLAYER_TURN;
+                battleOptions.state = ENEMY_FINISH;
                 battleOptions.turn++;
 
                 setButtons(battle_buttons, 1);
+
+                for (int i = 0; i < vector_size(activeBattle.enemy.projectiles); i++) {
+                    Projectile* projectile = activeBattle.enemy.projectiles + i;
+                    free(projectile->data);
+                }
+                vector_free(activeBattle.enemy.projectiles);
+            } else {
+                Rectangle playerHitbox = (Rectangle) {player.position.x - 16, player.position.y - 16, 32, 32};
+
+                for (int i = 0; i < vector_size(activeBattle.enemy.projectiles); i++) {
+                    Projectile* projectile = activeBattle.enemy.projectiles + i;
+
+                    Rectangle hitbox = projectile->get_hitbox(projectile);
+                    if (battleOptions.state == ENEMY && player.invincibility_timer > 0) {
+                        if (CheckCollisionRecs(playerHitbox, hitbox)) {
+                            damage_player(projectile, projectile->true_damage);
+                            PlaySound(sound_damage_take);
+                        }
+                    }
+
+                    // Remove projectiles outside of bounds
+                    if (!CheckCollisionRecs(hitbox, (Rectangle) {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT})) {
+                        free(projectile->data);
+                        vector_remove(activeBattle.enemy.projectiles, i--);
+                    }
+
+                    projectile->lifespan += frame_time;
+                }
             }
         }
-    }
-
-    size_t size = vector_size(activeBattle.enemy.projectiles);
-    for (int i = 0; i < size; i++) {
-        Projectile* projectile = activeBattle.enemy.projectiles + i;
-        projectile->lifespan += frame_time;
+    } else if (battleOptions.state == ENEMY_FINISH) {
+        if (battleOptions.timer >= BATTLE_BOUNDS_EXPAND_TIME) {
+            battleOptions.timer = 0;
+            battleOptions.state = PLAYER_TURN;
+        }
     }
 
     battleOptions.timer += frame_time;
@@ -186,11 +221,6 @@ void drawBattleScreen(const RenderTexture2D* texture) {
     if (activeBattle.enemy.health > 0) {
         Vector2 pos = {640 / 2.0f - activeBattle.enemy.texture.width / 2.0f, y};
         DrawTexture(activeBattle.enemy.texture, (int)pos.x, (int)pos.y, WHITE);
-    }
-
-    size_t size = vector_size(activeBattle.enemy.projectiles);
-    for (int i = 0; i < size; i++) {
-        activeBattle.enemy.projectiles[i].draw();
     }
 
     if (battleOptions.state == CALCULATING_DAMAGE) {
@@ -231,7 +261,7 @@ void drawBattleScreen(const RenderTexture2D* texture) {
         float healthBarWidth = 100;
         float renderWitdh = healthBarWidth * (renderHealth / maxHealth);
 
-        DrawRectangleLinesEx((Rectangle) {pos.x - healthBarWidth / 2, pos.y + font_size + 2, healthBarWidth, 10}, 1, WHITE);
+        DrawRectangleLinesEx((Rectangle) {pos.x - healthBarWidth / 2 - 1, pos.y + font_size + 2 - 1, healthBarWidth + 2, 10 + 2}, 1, WHITE);
         DrawRectangle(pos.x - healthBarWidth / 2, pos.y + font_size + 2, (int)healthBarWidth, 10, DARKGRAY);
         DrawRectangle(pos.x - healthBarWidth / 2, pos.y + font_size + 2, (int)renderWitdh, 10, RED);
 
@@ -254,15 +284,35 @@ void drawBattleScreen(const RenderTexture2D* texture) {
             DrawRectangleLinesEx(BATTLE_BOUNDS, line_width, WHITE);
 
             // render player
-            int width = texture_soul.width / 3;
+            int width = texture_soul.width / 2;
             int sprite = 0;
-            if (player.invincibility_timer > 0 && fmod(player.invincibility_timer, 0.25f) < 0.125f) {
+            if (player.invincibility_timer > 0) {
                 sprite = 1;
             }
 
             DrawTextureRec(texture_soul, (Rectangle) {sprite * width, 0, width, texture_soul.height},
                 (Vector2){player.position.x - width / 2, player.position.y - texture_soul.height / 2}, WHITE);
+
+
+            size_t size = vector_size(activeBattle.enemy.projectiles);
+            for (int i = 0; i < size; i++) {
+                Projectile *projectile = activeBattle.enemy.projectiles + i;
+                projectile->draw(projectile);
+            }
         }
+    } else if (battleOptions.state == ENEMY_FINISH) {
+        const int line_width = 3;
+        const float percent = 1 - (battleOptions.timer / BATTLE_BOUNDS_EXPAND_TIME);
+
+        const float expansionX = BATTLE_BOUNDS.width / 2 * percent;
+        const float expansionY = BATTLE_BOUNDS.height / 2 * percent;
+
+        Rectangle expandedRect = {
+            BATTLE_BOUNDS_MIDDLE.x - expansionX, BATTLE_BOUNDS_MIDDLE.y - expansionY, expansionX * 2, expansionY * 2
+        };
+
+        DrawRectangleRec(expandedRect, BLACK);
+        DrawRectangleLinesEx(expandedRect, line_width, WHITE);
     }
 }
 
@@ -295,7 +345,7 @@ void battle_attack() {
         battleOptions.last_damage = 0;
     } else if (battleOptions.state == CALCULATING_DAMAGE) {
 
-        float percent = battleOptions.timer; // 0 to 1 range, 0.5 is optimal damage
+        float percent = battleOptions.timer / CALCULATING_DAMAGE_LENGTH; // 0 to 1 range, 0.5 is optimal damage
         float damage = sinf(percent * PI) * 15;
 
         damage = damage * get_attack_stat() / powf((float)activeBattle.enemy.defence_stat, 1.75f);

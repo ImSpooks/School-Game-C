@@ -16,6 +16,7 @@ typedef enum BattleState {
     DEALING_DAMAGE,
     MOVE_HEALTHBAR,
     ENEMY,
+    ENEMY_FINISH,
     FINISHED,
 } BattleState;
 

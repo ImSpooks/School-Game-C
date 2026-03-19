@@ -21,7 +21,7 @@ Button* village2_buttons;
 void loadLevelVillage2() {
     levelVillage2.texture = LoadTexture("assets/textures/levels/village2.png");
 
-    setDialogue("Blacksmith Kukr: Hello there, you are ya doin'?");
+    setDialogue("Blacksmith Kukr: Hello there, how are ya doin'?");
 
     village2_buttons = (Button*) malloc(sizeof(Button) * 2);
 

@@ -3,7 +3,7 @@
 
 #include "../objects.h"
 
-#define PLAYER_SPEED 64
+#define PLAYER_SPEED 128
 
 typedef struct PlayerFlags {
     bool boss_flowey;

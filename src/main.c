@@ -2,6 +2,7 @@
 #include <raylib.h>
 #include <stdio.h>
 #include "vec.h"
+#include "globals.h"
 
 #include "screen/screen.h"
 #include "hud.h"
@@ -17,11 +18,8 @@ struct HUDOptions hud;
 
 void drawButtons();
 
-const int screenWidth = 320 * 2;
-const int screenHeight = 180 * 2;
-
-int renderWidth = screenWidth * (1280 / screenWidth);
-int renderHeight = screenHeight * (720 / screenHeight);
+int renderWidth = SCREEN_WIDTH * (1280 / SCREEN_WIDTH);
+int renderHeight = SCREEN_HEIGHT * (720 / SCREEN_HEIGHT);
 
 int main(void) {
     InitWindow(renderWidth, renderHeight, "Adventure Game");
@@ -36,7 +34,7 @@ int main(void) {
 
     SetTargetFPS(0);
 
-    const RenderTexture2D screenRenderer = LoadRenderTexture(screenWidth, screenHeight);
+    const RenderTexture2D screenRenderer = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     hud.render_hud = true;
     hud.render_background = false;
@@ -61,11 +59,11 @@ int main(void) {
         if (IsKeyDown(KEY_R) && GetScreenWidth() != 1280 && GetScreenHeight() != 720) {
                 SetWindowSize(1280, 720);
         }
-        if (IsKeyDown(KEY_O) && GetScreenWidth() != screenWidth && GetScreenHeight() != screenHeight) {
-            SetWindowSize(screenWidth, screenHeight);
+        if (IsKeyDown(KEY_O) && GetScreenWidth() != SCREEN_WIDTH && GetScreenHeight() != SCREEN_HEIGHT) {
+            SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         }
-        const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
-        const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
+        const float virtualWidthRatio = (float)renderWidth / (float)SCREEN_WIDTH;
+        const float virtualHeightRatio = (float)renderHeight / (float)SCREEN_HEIGHT;
 
         screen->update(&screenRenderer);
         updateHud(&screenRenderer);
@@ -98,6 +96,8 @@ int main(void) {
 
         EndDrawing();
     }
+    screen->unload();
+
     UnloadRenderTexture(screenRenderer);
 
     if (dialogue.lines != NULL && dialogueAllocated) {
@@ -159,12 +159,12 @@ void setDialogueMulti(char* text[], int lines) {
 }
 
 float getWidthScale() {
-    const float virtualWidthRatio = (float)renderWidth / (float)screenWidth;
+    const float virtualWidthRatio = (float)renderWidth / (float)SCREEN_WIDTH;
     return virtualWidthRatio;
 }
 
 float getHeightScale() {
-    const float virtualHeightRatio = (float)renderHeight / (float)screenHeight;
+    const float virtualHeightRatio = (float)renderHeight / (float)SCREEN_HEIGHT;
     return virtualHeightRatio;
 }
 
