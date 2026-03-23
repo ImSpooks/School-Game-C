@@ -4,6 +4,7 @@
 #include "level.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelVillage1();
 void unloadLevelVillage1();
@@ -21,7 +22,7 @@ Level levelVillage1 = {
 Button* village1_buttons;
 
 void loadLevelVillage1() {
-    levelVillage1.texture = LoadTexture("assets/textures/levels/village1.png");
+    levelVillage1.texture = &assets.texture_level_village1;
 
     village1_buttons = (Button*) malloc(sizeof(Button) * 4);
 
@@ -52,7 +53,6 @@ void loadLevelVillage1() {
 
 void unloadLevelVillage1() {
     free(village1_buttons);
-    UnloadTexture(levelVillage1.texture);
 }
 
 void village1_toBlacksmith() {

@@ -5,6 +5,7 @@
 
 #include "../globals.h"
 #include "../hud.h"
+#include "../asset_manager.h"
 
 void initializeGameScreen();
 void unloadGameScreen();
@@ -25,32 +26,21 @@ bool swappingLevel = false;
 bool fadeIn = false;
 static float timer = 0;
 
-Music music_forest;
-Music music_village;
-
 Music* music_current = NULL;
 
-
-
 void initializeGameScreen() {
-    music_forest = LoadMusicStream("assets/music/levels/forest.ogg");
-    music_village = LoadMusicStream("assets/music/levels/village.ogg");
+    levelStart.music = &assets.music_forest;
+    levelForest1.music = &assets.music_forest;
+    levelForest2.music = &assets.music_forest;
+    levelForest3.music = &assets.music_forest;
+    levelWizard1.music = &assets.music_forest;
+    levelWizard2.music = &assets.music_forest;
+    levelWizard3.music = &assets.music_forest;
 
-    music_forest.looping = true;
-    music_village.looping = true;
-
-    levelStart.music = &music_forest;
-    levelForest1.music = &music_forest;
-    levelForest2.music = &music_forest;
-    levelForest3.music = &music_forest;
-    levelWizard1.music = &music_forest;
-    levelWizard2.music = &music_forest;
-    levelWizard3.music = &music_forest;
-
-    levelVillage1.music = &music_village;
-    levelVillage2.music = &music_village;
-    levelVillage3.music = &music_village;
-    levelVillage4.music = &music_village;
+    levelVillage1.music = &assets.music_village;
+    levelVillage2.music = &assets.music_village;
+    levelVillage3.music = &assets.music_village;
+    levelVillage4.music = &assets.music_village;
 
 
     if (currentLevel == NULL) {
@@ -74,15 +64,12 @@ void unloadGameScreen() {
         StopMusicStream(*music_current);
         music_current = NULL;
     }
-
-    UnloadMusicStream(music_forest);
-    UnloadMusicStream(music_village);
 }
 
 void drawGameScreen(const RenderTexture2D* texture) {
     if (currentLevel != NULL) {
-        DrawTexturePro(currentLevel->texture,
-            (Rectangle) {0, 0, (float) currentLevel->texture.width, (float) currentLevel->texture.height},
+        DrawTexturePro(*currentLevel->texture,
+            (Rectangle) {0, 0, (float) (*currentLevel->texture).width, (float) (*currentLevel->texture).height},
             (Rectangle) {0, 0, (float) SCREEN_WIDTH, (float) SCREEN_HEIGHT},
             (Vector2) {0, 0},
             0.0f,

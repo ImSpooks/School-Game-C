@@ -8,6 +8,7 @@
 #include "../battle/battle.h"
 #include "../battle/enemy/wizard.h"
 #include "../screen/battle_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelWizard2();
 void unloadLevelWizard2();
@@ -24,7 +25,7 @@ Level levelWizard2 = {
 Button* wizzard2_buttons;
 
 void loadLevelWizard2() {
-    levelWizard2.texture = LoadTexture("assets/textures/levels/wizard2.png");
+    levelWizard2.texture = &assets.texture_level_wizard2;
 
     wizzard2_buttons = (Button*) malloc(sizeof(Button) * 2);
 
@@ -52,14 +53,13 @@ void loadLevelWizard2() {
 
 void unloadLevelWizard2() {
     free(wizzard2_buttons);
-    UnloadTexture(levelWizard2.texture);
 }
 
 void wizard2_battleWizard() {
     Battle battle = {
         .enemy = (Enemy) {
             .max_health = 2500,
-            .health = 1250,
+            .health = 2500,
             .attack_stat = 16,
             .defence_stat = 10,
             .total_attacks = 4,

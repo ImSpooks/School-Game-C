@@ -10,26 +10,21 @@
 #include "vec.h"
 #include "../../player/player.h"
 #include "../../screen/screen.h"
-
-Texture2D enemy_bear_projectile_texture;
+#include "../../asset_manager.h"
 
 void spawn_bear_projectile(Projectile **projectiles, int x, int y);
 void bear_projectile_draw(Projectile *projectile);
 Rectangle bear_projectile_hitbox(Projectile *projectile);
 
 void enemy_bear_initialize(Enemy *enemy) {
-    enemy->texture = LoadTexture("assets/textures/enemies/bear.png");
-    enemy->music = LoadMusicStream("assets/music/boss/bear.ogg");
-    enemy->music.looping = true;
+    enemy->texture = &assets.texture_enemy_bear;
 
-    enemy_bear_projectile_texture = LoadTexture("assets/textures/enemies/projectile/bear.png");
+    enemy->music = vector_create();
+    vector_add(&enemy->music, &assets.music_bear);
 }
 
 void enemy_bear_unload(Enemy *enemy) {
-    UnloadTexture(enemy->texture);
-    UnloadMusicStream(enemy->music);
-
-    UnloadTexture(enemy_bear_projectile_texture);
+    vector_free(enemy->music);
 }
 
 bool enemy_bear_attack(Projectile **projectiles, int type, float timer, int turn) {
@@ -44,7 +39,7 @@ void enemy_bear_pre_defeat() {
 
     Item* item = vector_add_dst(&player.inventory);
     item->type = SELLABLE;
-    item->texture = &item_texture_bear_tooth;
+    item->texture = &assets.texture_item_bear_tooth;
     item->value = 1;
 }
 

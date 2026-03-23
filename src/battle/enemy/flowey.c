@@ -10,27 +10,23 @@
 #include "vec.h"
 #include "../../player/player.h"
 #include "../../screen/screen.h"
+#include "../../asset_manager.h"
 
-Texture2D enemy_flowey_projectile_texture;
+Texture2D** enemy_flowey_projectile_texture;
 
 void spawn_flowey_projectile(Projectile **projectiles, int x, int y);
 void flowey_projectile_draw(Projectile *projectile);
 Rectangle flowey_projectile_hitbox(Projectile *projectile);
 
 void enemy_flowey_initialize(Enemy *enemy) {
-    enemy->texture = LoadTexture("assets/textures/enemies/flowey.png");
+    enemy->texture = &assets.texture_enemy_flowey;
 
-    enemy->music = LoadMusicStream("assets/music/boss/flowey.ogg");
-    enemy->music.looping = true;
-
-    enemy_flowey_projectile_texture = LoadTexture("assets/textures/enemies/projectile/flowey.png");
+    enemy->music = vector_create();
+    vector_add(&enemy->music, &assets.music_flowey);
 }
 
 void enemy_flowey_unload(Enemy *enemy) {
-    UnloadTexture(enemy->texture);
-    UnloadMusicStream(enemy->music);
-
-    UnloadTexture(enemy_flowey_projectile_texture);
+    vector_free(enemy->music);
 }
 
 bool enemy_flowey_attack(Projectile **projectiles, int type, float timer, int turn) {
@@ -38,35 +34,35 @@ bool enemy_flowey_attack(Projectile **projectiles, int type, float timer, int tu
 
     // Spawn projectiles nicely in an arc
     if (timer < 0.05) {
-        const int x = SCREEN_WIDTH / 2 - (enemy_flowey_projectile_texture.width / 2 / 2) - 64;
+        const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) - 64;
         const int y = 48;
 
         while (vector_size(*projectiles) < waves) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.1) {
-        const int x = SCREEN_WIDTH / 2 - (enemy_flowey_projectile_texture.width / 2 / 2) - 32;
+        const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) - 32;
         const int y = 32;
 
         while (vector_size(*projectiles) < waves * 2) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.15) {
-        const int x = SCREEN_WIDTH / 2 - (enemy_flowey_projectile_texture.width / 2 / 2);
+        const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2);
         const int y = 16;
 
         while (vector_size(*projectiles) < waves * 3) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.2) {
-        const int x = SCREEN_WIDTH / 2 - (enemy_flowey_projectile_texture.width / 2 / 2) + 32;
+        const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) + 32;
         const int y = 32;
 
         while (vector_size(*projectiles) < waves * 4) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.25) {
-        const int x = SCREEN_WIDTH / 2 - (enemy_flowey_projectile_texture.width / 2 / 2) + 64;
+        const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) + 64;
         const int y = 48;
 
         while (vector_size(*projectiles) < waves * 5) {
@@ -110,7 +106,7 @@ void enemy_flowey_pre_defeat() {
 
     Item* item = vector_add_dst(&player.inventory);
     item->type = COIN;
-    item->texture = &item_texture_coin;
+    item->texture = &assets.texture_item_coin;
     item->value = 1;
 }
 
@@ -121,7 +117,7 @@ void enemy_flowey_post_defeat() {
 void spawn_flowey_projectile(Projectile **projectiles, int x, int y) {
     Projectile *projectile = vector_add_dst(&*projectiles);
 
-    projectile->texture = &enemy_flowey_projectile_texture;
+    projectile->texture = &assets.texture_projectile_flowey;
     projectile->position = (Vector2){x, y};
     projectile->damage = 2;
     projectile->true_damage = false;

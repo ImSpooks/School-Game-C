@@ -9,6 +9,7 @@
 #include "../battle/battle.h"
 #include "../battle/enemy/hawk.h"
 #include "../screen/battle_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelStart();
 void unloadLevelStart();
@@ -28,8 +29,7 @@ Button* start_buttons;
 bool firstLoaded = false;
 
 void loadLevelStart() {
-
-    levelStart.texture = LoadTexture("assets/textures/levels/start.png");
+    levelStart.texture = &assets.texture_level_start;
 
     if (player.flags.boss_hawk) {
         // TODO: Game ending
@@ -69,7 +69,6 @@ void loadLevelStart() {
 
 void unloadLevelStart() {
     free(start_buttons);
-    UnloadTexture(levelStart.texture);
 }
 
 void start_goIntoTheForest() {

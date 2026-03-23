@@ -14,6 +14,7 @@
 #include "../hud.h"
 #include "../player/player.h"
 #include "../util/util.h"
+#include "../asset_manager.h"
 
 void initializeBattleScreen();
 void unloadBattleScreen();
@@ -35,33 +36,13 @@ Battle activeBattle;
 BattleOptions battleOptions;
 static bool pendingEndBattle = false;
 
-Texture2D texture_damage_bar;
-Texture2D texture_damage_slider;
-Texture2D texture_damage_slice;
 
-Texture2D texture_soul;
-
-Sound sound_attack;
-Sound sound_damage_enemy;
-Sound sound_damage_take;
-Sound sound_victory;
-
-
+int music_index;
 Button* battle_buttons;
 
 void initializeBattleScreen() {
     pendingEndBattle = false;
     setDialogue("This is the battle screen");
-
-    texture_damage_bar = LoadTexture("assets/textures/ui/damage_bar.png");
-    texture_damage_slider = LoadTexture("assets/textures/ui/damage_slider.png");
-    texture_damage_slice = LoadTexture("assets/textures/ui/damage_slice.png");
-    texture_soul = LoadTexture("assets/textures/ui/soul.png");
-
-    sound_attack = LoadSound("assets/sfx/attack.wav");
-    sound_damage_enemy = LoadSound("assets/sfx/damage_enemy.wav");
-    sound_damage_take = LoadSound("assets/sfx/damage_take.wav");
-    sound_victory = LoadSound("assets/sfx/victory.wav");
 
     activeBattle.enemy.initialize(&activeBattle.enemy);
     activeBattle.enemy.projectiles = vector_create();
@@ -75,30 +56,29 @@ void initializeBattleScreen() {
 
     setButtons(battle_buttons, 1);
 
-    PlayMusicStream(activeBattle.enemy.music);
+    music_index = 0;
+    PlayMusicStream(*(*activeBattle.enemy.music));
+
+    size_t musicSize = vector_size(activeBattle.enemy.music);
+    for (int i = 0; i < musicSize; i++) {
+        SetMusicVolume(*(*activeBattle.enemy.music + i), 1.0f);
+    }
 
     hud.render_items = false;
     hud.render_health = true;
 }
 
 void unloadBattleScreen() {
-    if (IsMusicStreamPlaying(activeBattle.enemy.music))
-        StopMusicStream(activeBattle.enemy.music);
-    if (IsMusicValid(activeBattle.enemy.music2) && IsMusicStreamPlaying(activeBattle.enemy.music2))
-        StopMusicStream(activeBattle.enemy.music2);
+    // Stop all musics from playing
+    size_t musicSize = vector_size(activeBattle.enemy.music);
+    for (int i = 0; i < musicSize; i++) {
+        Music* music = *(activeBattle.enemy.music + i);
+        if (IsMusicStreamPlaying(*music)) {
+            StopMusicStream(*music);
+        }
+    }
 
     printf("UNLOADING BATTLESCREEN");
-
-    UnloadTexture(texture_damage_bar);
-    UnloadTexture(texture_damage_slider);
-    UnloadTexture(texture_damage_slice);
-    UnloadTexture(texture_soul);
-
-    UnloadSound(sound_attack);
-    UnloadSound(sound_damage_enemy);
-    UnloadSound(sound_damage_take);
-
-    UnloadSound(sound_victory);
 
     activeBattle.enemy.unload(&activeBattle.enemy);
     if (battleOptions.state == ENEMY) {
@@ -125,22 +105,20 @@ void updateBattleScreen(const RenderTexture2D* texture) {
         return;
     }
 
-    if (!IsMusicValid(activeBattle.enemy.music2)) {
-        UpdateMusicStream(activeBattle.enemy.music);
-    } else {
-        if (IsMusicStreamPlaying(activeBattle.enemy.music2)) {
-            UpdateMusicStream(activeBattle.enemy.music2);
-        } else {
-            if (!IsMusicStreamPlaying(activeBattle.enemy.music)) {
-                if (!IsMusicStreamPlaying(activeBattle.enemy.music2)) {
-                    StopMusicStream(activeBattle.enemy.music);
-                    PlayMusicStream(activeBattle.enemy.music2);
-                }
-            } else {
-                UpdateMusicStream(activeBattle.enemy.music);
-            }
+    Music* activeMusic = *(activeBattle.enemy.music + music_index);
+
+    if (!IsMusicStreamPlaying(*activeMusic)) {
+        StopMusicStream(*activeMusic);
+
+        music_index++;
+        if (music_index >= vector_size(activeBattle.enemy.music)) {
+            music_index = 0;
         }
+
+        activeMusic = *(activeBattle.enemy.music + music_index);
+        PlayMusicStream(*activeMusic);
     }
+    UpdateMusicStream(*activeMusic);
 
     float frame_time = GetFrameTime();
 
@@ -149,7 +127,7 @@ void updateBattleScreen(const RenderTexture2D* texture) {
             battleOptions.timer = 0;
             battleOptions.state = DEALING_DAMAGE;
 
-            PlaySound(sound_attack);
+            PlaySound(assets.sfx_attack);
         }
     } else if (battleOptions.state == DEALING_DAMAGE) {
         if (battleOptions.timer >= DEALING_DAMAGE_LENGTH) {
@@ -157,7 +135,7 @@ void updateBattleScreen(const RenderTexture2D* texture) {
             battleOptions.state = MOVE_HEALTHBAR;
 
             setButtons(NULL, 0);
-            PlaySound(sound_damage_enemy);
+            PlaySound(assets.sfx_damage_enemy);
         }
     } else if (battleOptions.state == MOVE_HEALTHBAR) {
         if (battleOptions.timer >= RENDERING_DAMAGE_LENGTH) {
@@ -230,7 +208,7 @@ void updateBattleScreen(const RenderTexture2D* texture) {
                     if (player.invincibility_timer <= 0) {
                         if (CheckCollisionRecs(playerHitbox, hitbox)) {
                             damage_player(projectile, projectile->true_damage);
-                            PlaySound(sound_damage_take);
+                            PlaySound(assets.sfx_damage_take);
                         }
                     }
 
@@ -261,37 +239,37 @@ void drawBattleScreen(const RenderTexture2D* texture) {
         DrawLine(0, y, 640, y, GREEN);
     }
 
-    int y = 64 - (activeBattle.enemy.texture.height / 2);
+    int y = 64 - ((*activeBattle.enemy.texture).height / 2);
     if (y < 16) y = 16;
 
     if (activeBattle.enemy.health > 0) {
-        Vector2 pos = {640 / 2.0f - activeBattle.enemy.texture.width / 2.0f, y};
-        DrawTexture(activeBattle.enemy.texture, (int)pos.x, (int)pos.y, WHITE);
+        Vector2 pos = {640 / 2.0f - (*activeBattle.enemy.texture).width / 2.0f, y};
+        DrawTexture(*activeBattle.enemy.texture, (int)pos.x, (int)pos.y, WHITE);
     }
 
     if (battleOptions.state == CALCULATING_DAMAGE) {
-        DrawTexture(texture_damage_bar, 640 / 2 - texture_damage_bar.width / 2, 360 - 162, WHITE);
+        DrawTexture(assets.texture_ui_damage_bar, 640 / 2 - assets.texture_ui_damage_bar.width / 2, 360 - 162, WHITE);
 
-        int startPos = 640 / 2 - texture_damage_bar.width / 2;
-        int endPos   = 640 / 2 + texture_damage_bar.width / 2;
+        int startPos = 640 / 2 - assets.texture_ui_damage_bar.width / 2;
+        int endPos   = 640 / 2 + assets.texture_ui_damage_bar.width / 2;
         float percent = battleOptions.timer / CALCULATING_DAMAGE_LENGTH;
         int pos = startPos + (endPos - startPos) * percent;
 
-        DrawTexture(texture_damage_slider, pos - texture_damage_slider.width / 2, 360 - 162 + texture_damage_bar.height / 2 - texture_damage_slider.height / 2, WHITE);
+        DrawTexture(assets.texture_ui_damage_slider, pos - assets.texture_ui_damage_slider.width / 2, 360 - 162 + assets.texture_ui_damage_bar.height / 2 - assets.texture_ui_damage_slider.height / 2, WHITE);
 
 
     } else if (battleOptions.state == DEALING_DAMAGE) {
         int sprite = (int)floor((battleOptions.timer / DEALING_DAMAGE_LENGTH) * 6);
-        int width = texture_damage_slice.width / 6;
+        int width = assets.texture_ui_damage_slice.width / 6;
 
-        DrawTextureRec(texture_damage_slice, (Rectangle) {sprite * width, 0, width, texture_damage_slice.height},
-            (Vector2){640 / 2 - width / 2, (y + activeBattle.enemy.texture.height / 2) - (texture_damage_slice.height/2)}, WHITE);
+        DrawTextureRec(assets.texture_ui_damage_slice, (Rectangle) {sprite * width, 0, width, assets.texture_ui_damage_slice.height},
+            (Vector2){640 / 2 - width / 2, (y + (*activeBattle.enemy.texture).height / 2) - (assets.texture_ui_damage_slice.height/2)}, WHITE);
     } else if (battleOptions.state == MOVE_HEALTHBAR){
         const char* text = TextFormat("%d", (int) ceilf(battleOptions.last_damage));
         int font_size = 25;
         int width = MeasureText(text, font_size);
 
-        Vector2 pos = {(SCREEN_WIDTH / 2) - (width / 2), y + activeBattle.enemy.texture.height / 4 * 3};
+        Vector2 pos = {(SCREEN_WIDTH / 2) - (width / 2), y + (*activeBattle.enemy.texture).height / 4 * 3};
 
         DrawOutlinedText(text,
             (int) (pos.x + ((double) rand() / (double) RAND_MAX - 0.5) * 4),
@@ -332,14 +310,14 @@ void drawBattleScreen(const RenderTexture2D* texture) {
             DrawRectangleLinesEx(BATTLE_BOUNDS, line_width, WHITE);
 
             // render player
-            int width = texture_soul.width / 2;
+            int width = assets.texture_ui_soul.width / 2;
             int sprite = 0;
             if (player.invincibility_timer > 0) {
                 sprite = 1;
             }
 
-            DrawTextureRec(texture_soul, (Rectangle) {sprite * width, 0, width, texture_soul.height},
-                (Vector2){player.position.x - width / 2, player.position.y - texture_soul.height / 2}, WHITE);
+            DrawTextureRec(assets.texture_ui_soul, (Rectangle) {sprite * width, 0, width, assets.texture_ui_soul.height},
+                (Vector2){player.position.x - width / 2, player.position.y - assets.texture_ui_soul.height / 2}, WHITE);
 
 
             size_t size = vector_size(activeBattle.enemy.projectiles);
@@ -381,10 +359,12 @@ void end_battle() {
     battle_buttons[0].onClick = end_battle_button;
     setButtons(battle_buttons, 1);
 
-    SetMusicVolume(activeBattle.enemy.music, 0.4f);
-    if (IsMusicValid(activeBattle.enemy.music2))
-        SetMusicVolume(activeBattle.enemy.music2, 0.4f);
-    PlaySound(sound_victory);
+    size_t musicSize = vector_size(activeBattle.enemy.music);
+    for (int i = 0; i < musicSize; i++) {
+        SetMusicVolume(*(*activeBattle.enemy.music + i), 0.4f);
+    }
+
+    PlaySound(assets.sfx_victory);
 }
 
 void battle_attack() {
@@ -407,7 +387,7 @@ void battle_attack() {
         battleOptions.state = DEALING_DAMAGE;
 
         setButtons(NULL, 0);
-        PlaySound(sound_attack);
+        PlaySound(assets.sfx_attack);
     }
 }
 

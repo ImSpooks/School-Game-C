@@ -52,7 +52,6 @@ add_executable(SchoolGameC
         src/battle/enemy/wizard.c
         src/battle/enemy/wizard.h
         src/globals.h
-        src/items/items.c
         src/asset_manager.c
         src/asset_manager.h
 )

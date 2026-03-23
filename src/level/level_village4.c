@@ -6,6 +6,7 @@
 #include "../hud.h"
 #include "../screen/game_screen.h"
 #include "../player/player.h"
+#include "../asset_manager.h"
 
 void loadLevelVillage4();
 void unloadLevelVillage4();
@@ -21,7 +22,7 @@ Level levelVillage4 = {
 Button *village4_buttons;
 
 void loadLevelVillage4() {
-    levelVillage4.texture = LoadTexture("assets/textures/levels/village4.png");
+    levelVillage4.texture = &assets.texture_level_village4;
 
     setDialogue("Merchant Andre: What can I do for you?");
 
@@ -42,7 +43,6 @@ void loadLevelVillage4() {
 
 void unloadLevelVillage4() {
     free(village4_buttons);
-    UnloadTexture(levelVillage4.texture);
 }
 
 void village4_sellItem() {
@@ -51,7 +51,7 @@ void village4_sellItem() {
 
         Item* item = vector_add_dst(&player.inventory);
         item->type = COIN;
-        item->texture = &item_texture_coin;
+        item->texture = &assets.texture_item_coin;
         item->value = 1;
 
         setDialogue("Merchant Andre: Thanks for selling me that item, here's a golden coin!");

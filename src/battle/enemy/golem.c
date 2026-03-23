@@ -10,30 +10,24 @@
 #include "vec.h"
 #include "../../player/player.h"
 #include "../../screen/screen.h"
-
-Texture2D enemy_golem_projectile_texture;
+#include "../../asset_manager.h"
 
 void spawn_golem_projectile(Projectile **projectiles, int x, int y);
 void golem_projectile_draw(Projectile *projectile);
 Rectangle golem_projectile_hitbox(Projectile *projectile);
 
 void enemy_golem_initialize(Enemy *enemy) {
-    enemy->texture = LoadTexture("assets/textures/enemies/golem.png");
+    enemy->texture = &assets.texture_enemy_golem;
 
-    enemy->music = LoadMusicStream("assets/music/boss/golem_intro.ogg");
-    enemy->music.looping = false;
-    enemy->music2 = LoadMusicStream("assets/music/boss/golem_main.ogg");
-    enemy->music2.looping = true;
+    enemy->music = vector_create();
+    vector_add(&enemy->music, &assets.music_golem_intro);
+    vector_add(&enemy->music, &assets.music_golem_loop);
 
-    enemy_golem_projectile_texture = LoadTexture("assets/textures/enemies/projectile/golem.png");
+    assets.music_golem_intro.looping = false;
 }
 
 void enemy_golem_unload(Enemy *enemy) {
-    UnloadTexture(enemy->texture);
-    UnloadMusicStream(enemy->music);
-    UnloadMusicStream(enemy->music2);
-
-    UnloadTexture(enemy_golem_projectile_texture);
+    vector_free(enemy->music);
 }
 
 bool enemy_golem_attack(Projectile **projectiles, int type, float timer, int turn) {

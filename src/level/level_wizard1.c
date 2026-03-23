@@ -8,6 +8,7 @@
 #include "../battle/battle.h"
 #include "../battle/enemy/golem.h"
 #include "../screen/battle_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelWizard1();
 void unloadLevelWizard1();
@@ -24,7 +25,7 @@ Level levelWizard1 = {
 Button* wizzard1_buttons;
 
 void loadLevelWizard1() {
-    levelWizard1.texture = LoadTexture("assets/textures/levels/wizard1.png");
+    levelWizard1.texture = &assets.texture_level_wizard1;
 
     wizzard1_buttons = (Button*) malloc(sizeof(Button) * 2);
     
@@ -58,7 +59,6 @@ void loadLevelWizard1() {
 
 void unloadLevelWizard1() {
     free(wizzard1_buttons);
-    UnloadTexture(levelWizard1.texture);
 }
 
 void wizard1_battleGolem() {

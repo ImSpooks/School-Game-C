@@ -4,7 +4,7 @@
 #include <raylib.h>
 
 typedef struct Level {
-    Texture2D texture;
+    Texture2D* texture;
     Music* music;
     void (*load)();
     void (*unload)();

@@ -8,6 +8,7 @@
 #include "../battle/battle.h"
 #include "../battle/enemy/bear.h"
 #include "../screen/battle_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelForest2();
 void unloadLevelForest2();
@@ -25,9 +26,9 @@ Button* forest2_buttons;
 
 void loadLevelForest2() {
     if (player.flags.boss_bear)
-        levelForest2.texture = LoadTexture("assets/textures/levels/forest2_nobear.png");
+        levelForest2.texture = &assets.texture_level_forest2_nobear;
     else
-        levelForest2.texture = LoadTexture("assets/textures/levels/forest2_bear.png");
+        levelForest2.texture = &assets.texture_level_forest2_bear;
 
     forest2_buttons = (Button*) malloc(sizeof(Button) * 2);
 
@@ -62,7 +63,6 @@ void loadLevelForest2() {
 
 void unloadLevelForest2() {
     free(forest2_buttons);
-    UnloadTexture(levelForest2.texture);
 }
 
 void forest2_attackBear() {

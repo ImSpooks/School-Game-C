@@ -9,6 +9,7 @@
 #include "../../../../../Program Files (x86)/Windows Kits/10/include/10.0.26100.0/ucrt/stdlib.h"
 #include "util/util.h"
 #include "player/player.h"
+#include "asset_manager.h"
 
 int dialogueLines = 0;
 bool dialogueAllocated = false;
@@ -26,6 +27,8 @@ int main(void) {
     InitWindow(renderWidth, renderHeight, "Adventure Game");
 
     InitAudioDevice();
+
+    assets_load();
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 
@@ -46,8 +49,6 @@ int main(void) {
     player.inventory = vector_create();
     player.maxHealth = 100;
     player.health = player.maxHealth;
-
-    load_items();
 
     while (!WindowShouldClose()) {
         renderWidth = GetScreenWidth();
@@ -106,7 +107,7 @@ int main(void) {
 
     UnloadRenderTexture(screenRenderer);
 
-    unload_items();
+    assets_unload();
 
     if (dialogue.lines != NULL && dialogueAllocated) {
         free(dialogue.lines);

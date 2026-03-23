@@ -9,27 +9,21 @@
 #include "enemy.h"
 #include "vec.h"
 #include "../../player/player.h"
-#include "../../screen/screen.h"
-
-Texture2D enemy_wizard_projectile_texture;
+#include "../../asset_manager.h"
 
 void spawn_wizard_projectile(Projectile **projectiles, int x, int y);
 void wizard_projectile_draw(Projectile *projectile);
 Rectangle wizard_projectile_hitbox(Projectile *projectile);
 
 void enemy_wizard_initialize(Enemy *enemy) {
-    enemy->texture = LoadTexture("assets/textures/enemies/wizard.png");
-    enemy->music = LoadMusicStream("assets/music/boss/wizard.ogg");
-    enemy->music.looping = true;
+    enemy->texture = &assets.texture_enemy_wizard;
 
-    enemy_wizard_projectile_texture = LoadTexture("assets/textures/enemies/projectile/wizard.png");
+    enemy->music = vector_create();
+    vector_add(&enemy->music, &assets.music_wizard);
 }
 
 void enemy_wizard_unload(Enemy *enemy) {
-    UnloadTexture(enemy->texture);
-    UnloadMusicStream(enemy->music);
-
-    UnloadTexture(enemy_wizard_projectile_texture);
+    vector_free(enemy->music);
 }
 
 bool enemy_wizard_attack(Projectile **projectiles, int type, float timer, int turn) {

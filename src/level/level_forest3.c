@@ -6,6 +6,8 @@
 #include "../hud.h"
 #include "../screen/game_screen.h"
 #include "../player/player.h"
+#include "../asset_manager.h"
+#include "../asset_manager.h"
 
 void loadLevelForest3();
 void unloadLevelForest3();
@@ -22,7 +24,7 @@ Level levelForest3 = {
 Button* forest3_buttons;
 
 void loadLevelForest3() {
-    levelForest3.texture = LoadTexture("assets/textures/levels/forest3.png");
+    levelForest3.texture = &assets.texture_level_forest3;
 
     forest3_buttons = (Button*) malloc(sizeof(Button) * 2);
 
@@ -65,7 +67,6 @@ void loadLevelForest3() {
 
 void unloadLevelForest3() {
     free(forest3_buttons);
-    UnloadTexture(levelForest3.texture);
 }
 
 void forest3_payPirate() {
@@ -76,12 +77,12 @@ void forest3_payPirate() {
 
         Item* cloak = vector_add_dst(&player.inventory);
         cloak->type = DEFENCE;
-        cloak->texture = &item_texture_cloak;
+        cloak->texture = &assets.texture_item_cloak;
         cloak->value = 18;
 
         Item* potion = vector_add_dst(&player.inventory);
-        potion->type = DEFENCE;
-        potion->texture = &item_texture_strength_potion;
+        potion->type = ATTACK;
+        potion->texture = &assets.texture_item_strength_potion;
         potion->value = 17;
     } else {
         setDialogue("You do not have a golden coin.");

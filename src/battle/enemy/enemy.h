@@ -10,9 +10,8 @@ typedef void (*enemy_initialize_fn)(Enemy*);
 typedef void (*enemy_unload_fn)(Enemy*);
 
 struct Enemy {
-    Texture2D texture;
-    Music music;
-    Music music2;
+    Texture2D* texture;
+    Music** music;
 
     float max_health;
     float health;

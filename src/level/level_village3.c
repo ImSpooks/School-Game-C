@@ -8,6 +8,7 @@
 #include "../battle/battle.h"
 #include "../battle/enemy/flowey.h"
 #include "../screen/battle_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelVillage3();
 void unloadLevelVillage3();
@@ -23,7 +24,7 @@ Level levelVillage3 = {
 Button* village3_buttons;
 
 void loadLevelVillage3() {
-    levelVillage3.texture = LoadTexture("assets/textures/levels/village3.png");
+    levelVillage3.texture = &assets.texture_level_village3;
 
 
     if (player.flags.boss_flowey) {
@@ -59,7 +60,6 @@ void loadLevelVillage3() {
 
 void unloadLevelVillage3() {
     free(village3_buttons);
-    UnloadTexture(levelVillage3.texture);
 }
 
 void village3_battleFlowey() {

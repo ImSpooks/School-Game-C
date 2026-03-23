@@ -4,6 +4,7 @@
 #include "level.h"
 #include "../hud.h"
 #include "../screen/game_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelForest1();
 void unloadLevelForest1();
@@ -21,7 +22,7 @@ Level levelForest1 = {
 Button* forest1_buttons;
 
 void loadLevelForest1() {
-    levelForest1.texture = LoadTexture("assets/textures/levels/forest1.png");
+    levelForest1.texture = &assets.texture_level_forest1;
 
     setDialogue("2 paths, which one should I take?");
 
@@ -47,7 +48,6 @@ void loadLevelForest1() {
 
 void unloadLevelForest1() {
     free(forest1_buttons);
-    UnloadTexture(levelForest1.texture);
 }
 
 void forest1_goLeft() {

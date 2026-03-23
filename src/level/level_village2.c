@@ -6,6 +6,7 @@
 #include "../hud.h"
 #include "../screen/game_screen.h"
 #include "../player/player.h"
+#include "../asset_manager.h"
 
 void loadLevelVillage2();
 void unloadLevelVillage2();
@@ -21,7 +22,7 @@ Level levelVillage2 = {
 Button* village2_buttons;
 
 void loadLevelVillage2() {
-    levelVillage2.texture = LoadTexture("assets/textures/levels/village2.png");
+    levelVillage2.texture = &assets.texture_level_village2;
 
     setDialogue("Blacksmith Kukr: Hello there, how are ya doin'?");
 
@@ -42,7 +43,6 @@ void loadLevelVillage2() {
 
 void unloadLevelVillage2() {
     free(village2_buttons);
-    UnloadTexture(levelVillage2.texture);
 }
 
 void village2_buySword() {
@@ -52,7 +52,7 @@ void village2_buySword() {
         remove_item_type(COIN);
         Item* item = vector_add_dst(&player.inventory);
         item->type = ATTACK;
-        item->texture = &item_texture_sword;
+        item->texture = &assets.texture_item_sword;
         item->value = 10;
 
     } else {

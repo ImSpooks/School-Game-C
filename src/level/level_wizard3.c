@@ -6,6 +6,7 @@
 #include "../hud.h"
 #include "../player/player.h"
 #include "../screen/game_screen.h"
+#include "../asset_manager.h"
 
 void loadLevelWizard3();
 
@@ -23,7 +24,7 @@ Level levelWizard3 = {
 Button *wizard3_buttons;
 
 void loadLevelWizard3() {
-    levelWizard3.texture = LoadTexture("assets/textures/levels/wizard3.png");
+    levelWizard3.texture = &assets.texture_level_wizard3;
 
     setDialogue("This looks like a neat place");
 
@@ -52,7 +53,6 @@ void loadLevelWizard3() {
 
 void unloadLevelWizard3() {
     free(wizard3_buttons);
-    UnloadTexture(levelWizard3.texture);
 }
 
 void wizard3_pickupPotion() {
@@ -60,7 +60,7 @@ void wizard3_pickupPotion() {
 
     Item* cloak = vector_add_dst(&player.inventory);
     cloak->type = POTION;
-    cloak->texture = &item_texture_heal_potion;
+    cloak->texture = &assets.texture_item_heal_potion;
     cloak->value = 1;
 
     reloadLevel();
