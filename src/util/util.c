@@ -1,4 +1,4 @@
-#include "util.h"
+#include "util/util.h"
 
 #include <assert.h>
 #include <raylib.h>

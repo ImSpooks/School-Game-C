@@ -1,11 +1,11 @@
-#include "game_screen.h"
+#include "screen/game_screen.h"
 
 #include <stddef.h>
 #include <stdio.h>
 
-#include "../globals.h"
-#include "../hud.h"
-#include "../asset_manager.h"
+#include "globals.h"
+#include "hud.h"
+#include "asset_manager.h"
 
 void initializeGameScreen();
 void unloadGameScreen();

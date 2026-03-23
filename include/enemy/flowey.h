@@ -2,8 +2,8 @@
 #define TESTRAYLIB_FLOWEY_H
 #include <stdbool.h>
 
-#include "enemy.h"
-#include "projectile/projectile.h"
+#include "enemy/enemy.h"
+#include "enemy/projectile/projectile.h"
 
 void enemy_flowey_initialize(Enemy* enemy);
 void enemy_flowey_unload(Enemy* enemy);

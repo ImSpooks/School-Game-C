@@ -1,9 +1,9 @@
-#include "projectile.h"
+#include "../../../include/enemy/projectile/projectile.h"
 
 #include <math.h>
 #include <stdlib.h>
 
-#include "../../../player/player.h"
+#include "player/player.h"
 
 
 void collides_with_player(Projectile* projectile) {

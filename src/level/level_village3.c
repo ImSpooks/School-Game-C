@@ -1,14 +1,14 @@
 #include <raylib.h>
 #include <stdlib.h>
 
-#include "level.h"
-#include "../hud.h"
-#include "../screen/game_screen.h"
-#include "../player/player.h"
-#include "../battle/battle.h"
-#include "../battle/enemy/flowey.h"
-#include "../screen/battle_screen.h"
-#include "../asset_manager.h"
+#include "level/level.h"
+#include "hud.h"
+#include "screen/game_screen.h"
+#include "player/player.h"
+#include "battle/battle.h"
+#include "enemy/flowey.h"
+#include "screen/battle_screen.h"
+#include "asset_manager.h"
 
 void loadLevelVillage3();
 void unloadLevelVillage3();

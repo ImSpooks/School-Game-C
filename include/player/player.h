@@ -1,7 +1,7 @@
 #ifndef TESTRAYLIB_PLAYER_H
 #define TESTRAYLIB_PLAYER_H
 
-#include "../items/items.h"
+#include "items.h"
 
 #define PLAYER_SPEED 128
 

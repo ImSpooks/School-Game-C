@@ -1,10 +1,10 @@
 #include <raylib.h>
 #include <stdlib.h>
 
-#include "level.h"
-#include "../hud.h"
-#include "../screen/game_screen.h"
-#include "../asset_manager.h"
+#include "level/level.h"
+#include "hud.h"
+#include "screen/game_screen.h"
+#include "asset_manager.h"
 
 void loadLevelVillage1();
 void unloadLevelVillage1();

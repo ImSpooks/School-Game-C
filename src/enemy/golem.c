@@ -1,16 +1,16 @@
-#include "golem.h"
+#include "enemy/golem.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <raymath.h>
 
-#include "../../globals.h"
-#include "../../items/items.h"
-#include "enemy.h"
+#include "globals.h"
+#include "items.h"
+#include "enemy/enemy.h"
 #include "vec.h"
-#include "../../player/player.h"
-#include "../../screen/screen.h"
-#include "../../asset_manager.h"
+#include "player/player.h"
+#include "screen/screen.h"
+#include "asset_manager.h"
 
 void spawn_golem_projectile(Projectile **projectiles, int x, int y);
 void golem_projectile_draw(Projectile *projectile);

@@ -6,7 +6,6 @@
 
 #include "screen/screen.h"
 #include "hud.h"
-#include "../../../../../Program Files (x86)/Windows Kits/10/include/10.0.26100.0/ucrt/stdlib.h"
 #include "util/util.h"
 #include "player/player.h"
 #include "asset_manager.h"
@@ -131,13 +130,10 @@ void setScreen(Screen* newScreen) {
 
     if (screen != NULL && screen != newScreen) {
         screen->unload();
-        printf("unloading screen %p\n", screen);
     }
 
     screen = newScreen;
     newScreen->initialize();
-
-    printf("loading screen %p\n", newScreen);
 }
 
 void setDialogue(char* text) {

@@ -1,16 +1,16 @@
-#include "bear.h"
+#include "enemy/bear.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <raymath.h>
 
-#include "../../globals.h"
-#include "../../items/items.h"
-#include "enemy.h"
+#include "globals.h"
+#include "items.h"
+#include "enemy/enemy.h"
 #include "vec.h"
-#include "../../player/player.h"
-#include "../../screen/screen.h"
-#include "../../asset_manager.h"
+#include "player/player.h"
+#include "screen/screen.h"
+#include "asset_manager.h"
 
 void spawn_bear_projectile(Projectile **projectiles, int x, int y);
 void bear_projectile_draw(Projectile *projectile);

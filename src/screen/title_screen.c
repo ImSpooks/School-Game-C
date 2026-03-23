@@ -3,9 +3,9 @@
 #include <stddef.h>
 #include <stdlib.h>
 
-#include "../globals.h"
-#include "../hud.h"
-#include "screen.h"
+#include "globals.h"
+#include "hud.h"
+#include "screen/screen.h"
 
 void initializeTitleScreen();
 void unloadTitleScreen();

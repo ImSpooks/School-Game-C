@@ -2,7 +2,7 @@
 #define TESTRAYLIB_GAME_SCREEN_H
 
 #include "screen.h"
-#include "../level/level.h"
+#include "level/level.h"
 
 #define TRANSITION_LENGTH CLITERAL((float) 0.5)
 

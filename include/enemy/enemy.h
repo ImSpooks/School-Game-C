@@ -2,7 +2,7 @@
 #define TESTRAYLIB_ENEMY_H
 #include <raylib.h>
 
-#include "projectile/projectile.h"
+#include "enemy/projectile/projectile.h"
 
 typedef struct Enemy Enemy;
 

@@ -9,17 +9,12 @@ FetchContent_MakeAvailable(raylib)
 
 
 # Create the executable target first
+include_directories(SchoolGameC include)
 add_executable(SchoolGameC
         src/main.c
-        src/items/items.h
-        src/level/level.h
         src/screen/title_screen.c
-        src/screen/screen.h
         src/screen/game_screen.c
-        src/screen/game_screen.h
         src/hud.c
-        src/hud.h
-        src/util/util.h
         src/util/util.c
         src/util/util.c
         src/level/level_start.c
@@ -34,26 +29,14 @@ add_executable(SchoolGameC
         src/level/level_wizard2.c
         src/level/level_wizard3.c
         src/screen/battle_screen.c
-        src/screen/battle_screen.h
         src/player/player.c
-        src/player/player.h
-        src/battle/battle.h
-        src/battle/enemy/bear.c
-        src/battle/enemy/bear.h
-        src/battle/enemy/enemy.h
-        src/battle/enemy/golem.c
-        src/battle/enemy/golem.h
-        src/battle/enemy/hawk.c
-        src/battle/enemy/hawk.h
-        src/battle/enemy/projectile/projectile.h
-        src/battle/enemy/flowey.c
-        src/battle/enemy/flowey.h
-        src/battle/enemy/projectile/projectile.c
-        src/battle/enemy/wizard.c
-        src/battle/enemy/wizard.h
-        src/globals.h
+        src/enemy/bear.c
+        src/enemy/golem.c
+        src/enemy/hawk.c
+        src/enemy/flowey.c
+        src/enemy/projectile/projectile.c
+        src/enemy/wizard.c
         src/asset_manager.c
-        src/asset_manager.h
 )
 
 add_library(c-vector lib/c-vector/vec.c lib/c-vector/vec.h)

@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "enemy.h"
-#include "projectile/projectile.h"
+#include "enemy/projectile/projectile.h"
 
 void enemy_golem_initialize(Enemy* enemy);
 void enemy_golem_unload(Enemy* enemy);

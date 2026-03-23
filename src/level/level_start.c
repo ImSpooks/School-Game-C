@@ -1,15 +1,15 @@
 #include <raylib.h>
 #include <stdlib.h>
 
-#include "level.h"
-#include "../hud.h"
-#include "../player/player.h"
-#include "../screen/game_screen.h"
-#include "../screen/screen.h"
-#include "../battle/battle.h"
-#include "../battle/enemy/hawk.h"
-#include "../screen/battle_screen.h"
-#include "../asset_manager.h"
+#include "level/level.h"
+#include "hud.h"
+#include "player/player.h"
+#include "screen/game_screen.h"
+#include "screen/screen.h"
+#include "battle/battle.h"
+#include "enemy/hawk.h"
+#include "screen/battle_screen.h"
+#include "asset_manager.h"
 
 void loadLevelStart();
 void unloadLevelStart();

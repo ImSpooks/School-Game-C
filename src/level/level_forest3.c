@@ -1,13 +1,13 @@
 #include <raylib.h>
 #include <stdlib.h>
 
-#include "level.h"
+#include "level/level.h"
 #include "vec.h"
-#include "../hud.h"
-#include "../screen/game_screen.h"
-#include "../player/player.h"
-#include "../asset_manager.h"
-#include "../asset_manager.h"
+#include "hud.h"
+#include "screen/game_screen.h"
+#include "player/player.h"
+#include "asset_manager.h"
+#include "asset_manager.h"
 
 void loadLevelForest3();
 void unloadLevelForest3();

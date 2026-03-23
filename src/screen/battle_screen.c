@@ -1,4 +1,4 @@
-#include "battle_screen.h"
+#include "screen/battle_screen.h"
 
 #include <math.h>
 #include <raylib.h>
@@ -6,15 +6,15 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#include "game_screen.h"
-#include "../globals.h"
-#include "screen.h"
+#include "screen/game_screen.h"
+#include "globals.h"
+#include "screen/screen.h"
 #include "vec.h"
-#include "../battle/battle.h"
-#include "../hud.h"
-#include "../player/player.h"
-#include "../util/util.h"
-#include "../asset_manager.h"
+#include "battle/battle.h"
+#include "hud.h"
+#include "player/player.h"
+#include "util/util.h"
+#include "asset_manager.h"
 
 void initializeBattleScreen();
 void unloadBattleScreen();
