@@ -19,13 +19,15 @@ Rectangle wizard_projectile_hitbox(struct Projectile *projectile);
 void enemy_wizard_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_wizard;
 
-    array_allocate(&enemy->music, sizeof(Music*), 1);
-    ((Music**) enemy->music.data)[0] = &assets.music_wizard;
-    enemy->music.size = 1;
+    if (enemy->music.capacity == 0) {
+        array_allocate(&enemy->music, sizeof(Music*), 1);
+        ((Music**) enemy->music.data)[0] = &assets.music_wizard;
+        enemy->music.size = 1;
+    }
 }
 
 void enemy_wizard_unload(Enemy *enemy) {
-    array_free(&enemy->music);
+
 }
 
 bool enemy_wizard_attack(struct Array *projectiles, int rand_type, float timer, int turn) {

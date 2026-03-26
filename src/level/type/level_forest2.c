@@ -28,27 +28,47 @@ void level_forest2_enter(struct Hud *hud) {
             .text = "Go forward",
             .on_click = forest2_go_forward
         };
-    } else {
-        hud_set_dialogue_multi(hud, (char*[]) {
-            "Voiceover Pete: Attention all humans, this bear is really dangerous.",
-            "You gotta help us out!",
-            "The only thing you need to do is to fight the bear",
-            "with a sword!",
-            "",
-            player_contains_item(player, ATTACK) ? "You have a sword with you, what are you waiting for?!" : "You dont have a sword? You can get one at the village."}, 6); // TODO has sword
 
-        ((struct Button*)hud->buttons.data)[0] = (struct Button) {
-            .text = "Attack the bear",
-            .on_click = forest2_attack_bear
+        ((struct Button*)hud->buttons.data)[1] = (struct Button) {
+            .text = "Go back",
+            .on_click = forest2_go_back
         };
+
+        hud->buttons.size = 2;
+
+    } else {
+        int button = 0;
+
+        hud_set_dialogue_multi(
+            hud,
+            (char*[]){
+                "Voiceover Pete: Attention all humans, this bear is really dangerous.",
+                "You gotta help us out!",
+                "The only thing you need to do is to fight the bear",
+                "with a sword!",
+                "",
+                player_contains_item(player, ATTACK)
+                    ? "You have a sword with you, what are you waiting for?!"
+                    : "You dont have a sword? You can get one at the village."
+            },
+            6
+        );
+
+
+        if (player_contains_item(player, ATTACK)) {
+            ((struct Button*)hud->buttons.data)[0] = (struct Button) {
+                .text = "Attack the bear",
+                .on_click = forest2_attack_bear
+            };
+            button++;
+        }
+
+        ((struct Button*)hud->buttons.data)[button] = (struct Button) {
+            .text = "Go back",
+            .on_click = forest2_go_back
+        };
+        hud->buttons.size = button+1;
     }
-
-    ((struct Button*)hud->buttons.data)[1] = (struct Button) {
-        .text = "Go back",
-        .on_click = forest2_go_back
-    };
-
-    hud->buttons.size = 2;
 }
 
 void level_forest2_leave(struct Hud *hud) {

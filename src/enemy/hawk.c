@@ -20,16 +20,18 @@ Rectangle hawk_projectile_hitbox(struct Projectile *projectile);
 void enemy_hawk_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_hawk;
 
-    array_allocate(&enemy->music, sizeof(Music*), 2);
-    ((Music**) enemy->music.data)[0] = &assets.music_hawk_intro;
-    ((Music**) enemy->music.data)[1] = &assets.music_hawk_loop;
+    if (enemy->music.capacity == 0) {
+        array_allocate(&enemy->music, sizeof(Music*), 2);
+        ((Music**) enemy->music.data)[0] = &assets.music_hawk_intro;
+        ((Music**) enemy->music.data)[1] = &assets.music_hawk_loop;
 
-    assets.music_hawk_intro.looping = false;
-    enemy->music.size = 2;
+        assets.music_hawk_intro.looping = false;
+        enemy->music.size = 2;
+    }
 }
 
 void enemy_hawk_unload(Enemy *enemy) {
-    array_free(&enemy->music);
+
 }
 
 bool enemy_hawk_attack(struct Array *projectiles, int rand_type, float timer, int turn) {

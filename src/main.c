@@ -77,9 +77,9 @@ int main(void) {
 
     enum SceneType scene = TITLE;
 
-    SetTargetFPS(60);
-
     int monitor = GetCurrentMonitor();
+    SetTargetFPS(GetMonitorRefreshRate(monitor));
+
 
     const RenderTexture2D screenRenderer = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
     long frame = 0;
@@ -154,6 +154,9 @@ int main(void) {
             0.0f,
             WHITE
         );
+
+
+        // DrawText(TextFormat("FPS: %i", GetFPS()), 10, 10, 20, GREEN);
 
         EndDrawing();
         frame++;

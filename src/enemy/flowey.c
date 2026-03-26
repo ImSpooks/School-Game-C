@@ -22,17 +22,19 @@ Rectangle flowey_projectile_hitbox(struct Projectile *projectile);
 void enemy_flowey_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_flowey;
 
-    array_allocate(&enemy->music, sizeof(Music*), 1);
-    ((Music**) enemy->music.data)[0] = &assets.music_flowey;
-    enemy->music.size = 1;
+    if (enemy->music.capacity == 0) {
+        array_allocate(&enemy->music, sizeof(Music *), 1);
+        ((Music **) enemy->music.data)[0] = &assets.music_flowey;
+        enemy->music.size = 1;
+    }
 }
 
 void enemy_flowey_unload(Enemy *enemy) {
-    array_free(&enemy->music);
+
 }
 
 bool enemy_flowey_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
-    const int waves = (int) Clamp((float) turn + 1, 1, 4);
+    const int waves = (int) Clamp((float) turn + 2, 2, 5);
 
 
     // Spawn projectiles nicely in an arc

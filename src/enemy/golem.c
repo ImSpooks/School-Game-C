@@ -20,16 +20,18 @@ Rectangle golem_projectile_hitbox(struct Projectile *projectile);
 void enemy_golem_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_golem;
 
-    array_allocate(&enemy->music, sizeof(Music*), 2);
-    ((Music**) enemy->music.data)[0] = &assets.music_golem_intro;
-    ((Music**) enemy->music.data)[1] = &assets.music_golem_loop;
+    if (enemy->music.capacity == 0) {
+        array_allocate(&enemy->music, sizeof(Music*), 2);
+        ((Music**) enemy->music.data)[0] = &assets.music_golem_intro;
+        ((Music**) enemy->music.data)[1] = &assets.music_golem_loop;
 
-    assets.music_golem_intro.looping = false;
-    enemy->music.size = 2;
+        assets.music_golem_intro.looping = false;
+        enemy->music.size = 2;
+    }
 }
 
 void enemy_golem_unload(Enemy *enemy) {
-    array_free(&enemy->music);
+
 }
 
 bool enemy_golem_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
