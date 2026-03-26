@@ -1,65 +1,89 @@
 #include <stdlib.h>
 #include <raylib.h>
-#include <stdio.h>
-#include "vec.h"
 #include "globals.h"
 
-#include "screen/screen.h"
+#include "scene/scene.h"
+#include "scene/scene_title.h"
+#include "scene/scene_level.h"
+#include "scene/scene_battle.h"
+
 #include "hud.h"
 #include "util/util.h"
 #include "player/player.h"
 #include "asset_manager.h"
+#include "level/level_registry.h"
 
-int dialogueLines = 0;
-bool dialogueAllocated = false;
 
-Screen* screen = NULL;
-struct HUDOptions hud;
-
-void drawButtons();
-
-int renderWidth = SCREEN_WIDTH * (1280 / SCREEN_WIDTH);
-int renderHeight = SCREEN_HEIGHT * (720 / SCREEN_HEIGHT);
-
-int frame = 0;
 int main(void) {
-    InitWindow(renderWidth, renderHeight, "Adventure Game");
-
+    InitWindow(1280, 720, "Adventure Game");
     InitAudioDevice();
-
-    assets_load();
 
     SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-    // The target's height is flipped (in the source Rectangle), due to OpenGL reasons
+    // Initialize game stuff
+    assets_load();
+    struct Hud hud = {
+        .buttons = array_empty(),
+        .dialogue = array_empty(),
+    };
+    hud.option_flags = RENDER_HUD | RENDER_BUTTONS | RENDER_ITEMS;
 
-    setScreen(&titleScreen);
+    level_registry_initialize(&level_registry);
 
-    SetTargetFPS(0);
+    struct TitleData title_data = {};
+    struct Scene title_scene = {
+        .load   = title_scene_load,
+        .unload = title_scene_unload,
+        .update = title_scene_update,
+        .draw   = title_scene_draw,
+
+        .data = &title_data,
+        .music = &assets.empty_music,
+        .hud = &hud,
+    };
+
+    struct LevelData level_data = {
+        .current_level = &level_registry.levelStart
+    };
+    struct Scene level_scene = {
+        .load   = level_scene_load,
+        .unload = level_scene_unload,
+        .update = level_scene_update,
+        .draw   = level_scene_draw,
+
+        .music = &assets.empty_music,
+        .hud = &hud,
+        .data = &level_data
+    };
+
+    struct BattleData battle_data = {};
+    struct Scene battle_scene = {
+        .load   = battle_scene_load,
+        .unload = battle_scene_unload,
+        .post_unload = battle_scene_post_unload,
+        .update = battle_scene_update,
+        .draw   = battle_scene_draw,
+
+        .music = &assets.empty_music,
+        .hud = &hud,
+        .data = &battle_data
+    };
+
+    struct Scene credits_scene = title_scene;
+
+    player.inventory = array_empty();
+
+    title_scene.load(&title_scene, &hud);
+
+    enum SceneType scene = TITLE;
+
+    SetTargetFPS(60);
+
+    int monitor = GetCurrentMonitor();
 
     const RenderTexture2D screenRenderer = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    hud.render_hud = true;
-    hud.render_background = false;
-    hud.render_buttons = true;
-    hud.render_items = true;
-    hud.render_health = false;
-
-    player.inventory = vector_create();
-    player.maxHealth = 100;
-    player.health = player.maxHealth;
-
+    long frame = 0;
     while (!WindowShouldClose()) {
-        renderWidth = GetScreenWidth();
-        renderHeight = GetScreenHeight();
-
-        if (screen == NULL) {
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            // just to be sure
-            EndDrawing();
-            continue;
-        }
         // Update
         if (IsKeyDown(KEY_R) && GetScreenWidth() != 1280 && GetScreenHeight() != 720) {
                 SetWindowSize(1280, 720);
@@ -67,32 +91,64 @@ int main(void) {
         if (IsKeyDown(KEY_O) && GetScreenWidth() != SCREEN_WIDTH && GetScreenHeight() != SCREEN_HEIGHT) {
             SetWindowSize(SCREEN_WIDTH, SCREEN_HEIGHT);
         }
-        const float virtualWidthRatio = (float)renderWidth / (float)SCREEN_WIDTH;
-        const float virtualHeightRatio = (float)renderHeight / (float)SCREEN_HEIGHT;
 
-        screen->update(&screenRenderer);
-        updateHud(&screenRenderer);
+        if (monitor != GetCurrentMonitor()) {
+            monitor = GetCurrentMonitor();
+            SetTargetFPS(GetMonitorRefreshRate(monitor));
+        }
+
+        struct Scene *current_scene = 0;
+
+        switch (scene) {
+            case NONE:
+                continue;
+            case TITLE:
+                current_scene = &title_scene;
+                break;
+            case LEVEL:
+                current_scene = &level_scene;
+                break;
+            case BATTLE:
+                current_scene = &battle_scene;
+                break;
+            case CREDITS:
+                current_scene = &credits_scene;
+                break;
+        }
+
+        if (current_scene == 0) {
+            continue;
+        }
+
+        current_scene->update(current_scene, &hud);
+        hud_update(current_scene, &hud);
+
+        if (IsMusicValid(*current_scene->music)) {
+            UpdateMusicStream(*current_scene->music);
+        }
 
         // Draw
         // Screen
         BeginTextureMode(screenRenderer);
         {
             ClearBackground(RAYWHITE);
-            screen->draw(&screenRenderer);
 
-            drawHud(&screenRenderer);
+            current_scene->draw(current_scene->data);
+            hud_draw(&hud);
         }
         EndTextureMode();
 
         BeginDrawing();
 
+        const float virtualWidthRatio = (float)GetScreenWidth() / (float)SCREEN_WIDTH;
+        const float virtualHeightRatio = (float)GetScreenHeight() / (float)SCREEN_HEIGHT;
 
         DrawTexturePro(
             screenRenderer.texture,
             (Rectangle){0, 0, (float)screenRenderer.texture.width, -(float)screenRenderer.texture.height},
             (Rectangle){
-                -virtualWidthRatio, -virtualHeightRatio, (float) renderWidth + virtualWidthRatio * 2.0f,
-                (float) (renderHeight) + virtualHeightRatio * 2.0f
+                -virtualWidthRatio, -virtualHeightRatio, (float) GetScreenWidth() + virtualWidthRatio * 2.0f,
+                (float) GetScreenHeight() + virtualHeightRatio * 2.0f
             },
             (Vector2){0, 0},
             0.0f,
@@ -101,82 +157,60 @@ int main(void) {
 
         EndDrawing();
         frame++;
+
+        // Check if we need to change scenes
+        if (current_scene->request_scene_change.type != NONE) {
+            scene = current_scene->request_scene_change.type;
+
+            struct Scene *new_scene = &title_scene;
+            switch (scene) {
+                case LEVEL:
+                    new_scene = &level_scene;
+                    break;
+                case BATTLE:
+                    new_scene = &battle_scene;
+                    break;
+                case CREDITS:
+                    new_scene = &credits_scene;
+                    break;
+                case NONE:
+                case TITLE:
+                    break;
+            }
+
+            current_scene->unload(current_scene, &hud);
+            if (current_scene->request_scene_change.callback != NULL) {
+                current_scene->request_scene_change.callback(current_scene->data, new_scene, &hud);
+            }
+            new_scene->load(new_scene, &hud);
+
+            if (current_scene->post_unload != NULL) {
+                current_scene->post_unload(current_scene, &hud);
+            }
+
+            current_scene->request_scene_change.type = NONE;
+            current_scene->request_scene_change.callback = NULL;
+            frame = 0;
+        }
     }
-    screen->unload();
 
     UnloadRenderTexture(screenRenderer);
 
+    title_scene.unload(&title_scene, &hud);
+
+    level_scene.unload(&level_scene, &hud);
+
+    battle_scene.unload(&battle_scene, &hud);
+
+    credits_scene.unload(&credits_scene, &hud);
+
+    array_free(&hud.dialogue);
+    array_free(&hud.buttons);
+    array_free(&player.inventory);
+
     assets_unload();
-
-    if (dialogue.lines != NULL && dialogueAllocated) {
-        free(dialogue.lines);
-        dialogue.lines = NULL;
-        dialogueAllocated = 0;
-    }
-
-    if (vector_size(player.inventory) > 0)
-        vector_free(player.inventory);
 
     CloseWindow();
 
     return 0;
-}
-
-void setScreen(Screen* newScreen) {
-    if (newScreen == screen) {
-        return;
-    }
-    frame = 0;
-
-    if (screen != NULL && screen != newScreen) {
-        screen->unload();
-    }
-
-    screen = newScreen;
-    newScreen->initialize();
-}
-
-void setDialogue(char* text) {
-    setDialogueMulti((char*[]){ text }, 1);
-}
-
-void setDialogueMulti(char* text[], int lines) {
-    if (dialogue.lines != NULL && dialogueAllocated) {
-        free(dialogue.lines);
-        dialogue.lines = NULL;
-        dialogueAllocated = false;
-    }
-
-    if (lines <= 0) {
-        dialogue.lines = NULL;
-        dialogueLines = 0;
-        dialogueAllocated = false;
-        return;
-    }
-
-    char** newLines = malloc(sizeof(char*) * (size_t)lines);
-
-    for (int i = 0; i < lines; i++) {
-        newLines[i] = text[i];
-    }
-
-    dialogue.lines = newLines;
-    dialogue.lineCount = lines;
-    dialogueAllocated = true;
-}
-
-float getWidthScale() {
-    const float virtualWidthRatio = (float)renderWidth / (float)SCREEN_WIDTH;
-    return virtualWidthRatio;
-}
-
-float getHeightScale() {
-    const float virtualHeightRatio = (float)renderHeight / (float)SCREEN_HEIGHT;
-    return virtualHeightRatio;
-}
-
-Vector2 getScaledMousePos() {
-    float mouseX = (float) GetMouseX() / getWidthScale();
-    float mouseY = (float) GetMouseY() / getHeightScale();
-    return (Vector2){mouseX, mouseY};
 }

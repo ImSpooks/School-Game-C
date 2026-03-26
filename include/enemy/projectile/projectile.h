@@ -2,19 +2,22 @@
 #define TESTRAYLIB_PROJECTILE_H
 #include <raylib.h>
 
-typedef struct Projectile Projectile;
+struct Projectile;
+
+
 
 struct Projectile {
     Vector2 position;
     Texture2D* texture;
-    int damage;
+    float damage;
     bool true_damage;
     float lifespan; // timer
     void* data;
 
-    void (*draw)(Projectile*);
-    Rectangle (*get_hitbox)(Projectile*);
+    void (*draw)(struct Projectile*);
+    Rectangle (*hitbox)(struct Projectile*);
 };
 
-void damage_player(Projectile* projectile, bool ignore_armor);
+bool projectile_collides_with_player(struct Projectile* projectile, Rectangle player_hitbox);
+void projectile_damage_player(struct Projectile* projectile, bool ignore_armor);
 #endif //TESTRAYLIB_PROJECTILE_H

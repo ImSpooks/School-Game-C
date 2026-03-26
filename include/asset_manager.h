@@ -10,6 +10,9 @@ struct Assets {
     // Textures
     // -------------------------------
 
+    Texture2D empty_texture;
+    Music empty_music;
+
     // levels
     Texture2D texture_level_start;
     Texture2D texture_level_forest1;

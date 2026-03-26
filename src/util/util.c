@@ -1,10 +1,27 @@
 #include "util/util.h"
 
-#include <assert.h>
 #include <raylib.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
+
+#include "globals.h"
+
+float GetWidthScale() {
+    const float virtualWidthRatio = (float)GetScreenWidth() / (float)SCREEN_WIDTH;
+    return virtualWidthRatio;
+}
+
+float GetHeightScale() {
+    const float virtualHeightRatio = (float)GetScreenHeight() / (float)SCREEN_HEIGHT;
+    return virtualHeightRatio;
+}
+
+Vector2 GetScaledMousePos() {
+    float mouseX = (float) GetMouseX() / GetWidthScale();
+    float mouseY = (float) GetMouseY() / GetHeightScale();
+    return (Vector2){mouseX, mouseY};
+}
+
 
 void DrawOutlinedText(const char *text, int posX, int posY, int fontSize, Color color, int outlineSize, Color outlineColor) {
     if (text == NULL) return;
@@ -14,7 +31,6 @@ void DrawOutlinedText(const char *text, int posX, int posY, int fontSize, Color 
     }
 
     int r = outlineSize;
-    int r2 = r * r;
     for (int dy = -r; dy <= r; dy++) {
         for (int dx = -r; dx <= r; dx++) {
             if (dx == 0 && dy == 0) continue;

@@ -1,4 +1,4 @@
-#include "enemy/wizard.h"
+#include "enemy/type/wizard.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -7,28 +7,30 @@
 #include "globals.h"
 #include "items.h"
 #include "enemy/enemy.h"
-#include "vec.h"
+
 #include "player/player.h"
 #include "asset_manager.h"
+#include "enemy/projectile/projectile.h"
 
-void spawn_wizard_projectile(Projectile **projectiles, int x, int y);
-void wizard_projectile_draw(Projectile *projectile);
-Rectangle wizard_projectile_hitbox(Projectile *projectile);
+void spawn_wizard_projectile(struct Projectile *projectiles, int x, int y);
+void wizard_projectile_draw(struct Projectile *projectile);
+Rectangle wizard_projectile_hitbox(struct Projectile *projectile);
 
 void enemy_wizard_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_wizard;
 
-    enemy->music = vector_create();
-    vector_add(&enemy->music, &assets.music_wizard);
+    array_allocate(&enemy->music, sizeof(Music*), 1);
+    ((Music**) enemy->music.data)[0] = &assets.music_wizard;
+    enemy->music.size = 1;
 }
 
 void enemy_wizard_unload(Enemy *enemy) {
-    vector_free(enemy->music);
+    array_free(&enemy->music);
 }
 
-bool enemy_wizard_attack(Projectile **projectiles, int type, float timer, int turn) {
+bool enemy_wizard_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
 
-    printf("%d\n", type);
+    printf("%d\n", rand_type);
 
     return true;
 }
@@ -37,19 +39,19 @@ void enemy_wizard_pre_defeat() {
     player.flags.boss_wizard = true;
 }
 
-void enemy_wizard_post_defeat() {
+void enemy_wizard_post_defeat(struct Hud *hud) {
 
 }
 
-void spawn_wizard_projectile(Projectile **projectiles, int x, int y) {
+void spawn_wizard_projectile(struct Projectile *projectiles, int x, int y) {
     // TODO
 
 }
 
-void wizard_projectile_draw(Projectile *projectile) {
+void wizard_projectile_draw(struct Projectile *projectile) {
     // TODO
 }
 
-Rectangle wizard_projectile_hitbox(Projectile *projectile) {
+Rectangle wizard_projectile_hitbox(struct Projectile *projectile) {
     return (Rectangle){projectile->position.x, projectile->position.y, projectile->texture->width, projectile->texture->height};
 }

@@ -1,6 +1,7 @@
 #ifndef TESTRAYLIB_PLAYER_H
 #define TESTRAYLIB_PLAYER_H
 
+#include "util/array.h"
 #include "items.h"
 
 #define PLAYER_SPEED 128
@@ -18,23 +19,25 @@ typedef struct PlayerFlags {
     bool healed_angel;
 } PlayerFlags;
 
-typedef struct Player {
-    Item* inventory;
-    int health;
-    int maxHealth;
+struct Player {
+    struct Array inventory;
     PlayerFlags flags;
+
+    float health;
+    float maxHealth;
 
     Vector2 position;
     float invincibility_timer;
-} Player;
+};
 
-extern Player player;
+float player_get_stat(struct Player player, enum ItemType type);
+float player_get_attack(struct Player player);
+float player_get_defence(struct Player player);
 
-float get_attack_stat();
-float get_defence_stat();
+void player_add_item(struct Player *player, struct Item item);
+void player_remove_item(struct Player *player, enum ItemType type);
+bool player_contains_item(struct Player player, enum ItemType type);
 
-void remove_item_index(int index);
-void remove_item_type(ItemType type);
-bool contains_item(ItemType type);
+extern struct Player player;
 
 #endif //TESTRAYLIB_PLAYER_H

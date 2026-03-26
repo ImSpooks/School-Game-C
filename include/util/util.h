@@ -2,10 +2,10 @@
 #define TESTRAYLIB_RAYLIB_UTIL_H
 #include <raylib.h>
 
-float getWidthScale();
-float getHeightScale();
-Vector2 getScaledMousePos();
-Vector2 getScaledMousePosOffset(Vector2 offset);
+// raylib type functions
+float GetWidthScale();
+float GetHeightScale();
+Vector2 GetScaledMousePos();
 
 void DrawOutlinedText(const char *text, int posX, int posY, int fontSize, Color color, int outlineSize, Color outlineColor);
 

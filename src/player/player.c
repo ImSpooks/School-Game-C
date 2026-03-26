@@ -1,15 +1,12 @@
 #include "player/player.h"
 
-#include "vec.h"
 
-Player player;
-
-float get_inventory_stat(ItemType type) {
+float player_get_stat(struct Player player, enum ItemType type){
     float base = 1.0f;
 
-    size_t size = vector_size(player.inventory);
+    const int size = player.inventory.size;
     for (int i = 0; i < size; i++) {
-        Item item = player.inventory[i];
+        struct Item item = ((struct Item*)player.inventory.data)[i];
         if (item.type == type) {
             base += item.value;
         }
@@ -17,37 +14,50 @@ float get_inventory_stat(ItemType type) {
     return base;
 }
 
-float get_attack_stat() {
-    return get_inventory_stat(ATTACK);
+float player_get_attack(struct Player player) {
+    return player_get_stat(player, ATTACK);
+}
+float player_get_defence(struct Player player) {
+    return player_get_stat(player, DEFENCE);
 }
 
-float get_defence_stat() {
-    return get_inventory_stat(DEFENCE);
+void player_add_item(struct Player *player, struct Item item) {
+
+    const int size = player->inventory.size;
+    array_allocate(&player->inventory, sizeof(struct Item), size + 1);
+
+
+    ((struct Item*)player->inventory.data)[size] = item;
+
+    player->inventory.size = size + 1;
 }
 
-void remove_item_index(int index) {
+void player_remove_item(struct Player *player, enum ItemType type) {
 
-}
+    int size = player->inventory.size;
+    struct Item *items = (struct Item*)player->inventory.data;
 
-void remove_item_type(ItemType type) {
-    size_t size = vector_size(player.inventory);
     for (int i = 0; i < size; i++) {
-        Item item = player.inventory[i];
-        if (item.type == type) {
-            vector_remove(player.inventory, i);
-            i--;
-            size--;
+        if (items[i].type == type) {
+            items[i] = items[--size];
         }
     }
+    player->inventory.size = size;
 }
 
-bool contains_item(ItemType type) {
-    size_t size = vector_size(player.inventory);
+bool player_contains_item(struct Player player, enum ItemType type) {
+    const int size = player.inventory.size;
     for (int i = 0; i < size; i++) {
-        Item item = player.inventory[i];
+        struct Item item = ((struct Item*)player.inventory.data)[i];
         if (item.type == type) {
             return true;
         }
     }
     return false;
 }
+
+
+struct Player player = {
+    .maxHealth = 100,
+    .health = 100
+};

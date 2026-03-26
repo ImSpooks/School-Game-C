@@ -1,79 +1,83 @@
-#include "enemy/flowey.h"
+#include "enemy/type/flowey.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <raymath.h>
+#include <stdlib.h>
 
 #include "globals.h"
 #include "items.h"
 #include "enemy/enemy.h"
-#include "vec.h"
+
 #include "player/player.h"
-#include "screen/screen.h"
 #include "asset_manager.h"
+#include "enemy/projectile/projectile.h"
 
 Texture2D** enemy_flowey_projectile_texture;
 
-void spawn_flowey_projectile(Projectile **projectiles, int x, int y);
-void flowey_projectile_draw(Projectile *projectile);
-Rectangle flowey_projectile_hitbox(Projectile *projectile);
+void spawn_flowey_projectile(struct Array *projectiles, int x, int y);
+void flowey_projectile_draw(struct Projectile *projectile);
+Rectangle flowey_projectile_hitbox(struct Projectile *projectile);
 
 void enemy_flowey_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_flowey;
 
-    enemy->music = vector_create();
-    vector_add(&enemy->music, &assets.music_flowey);
+    array_allocate(&enemy->music, sizeof(Music*), 1);
+    ((Music**) enemy->music.data)[0] = &assets.music_flowey;
+    enemy->music.size = 1;
 }
 
 void enemy_flowey_unload(Enemy *enemy) {
-    vector_free(enemy->music);
+    array_free(&enemy->music);
 }
 
-bool enemy_flowey_attack(Projectile **projectiles, int type, float timer, int turn) {
-    const int waves = Clamp(turn + 1, 1, 4);
+bool enemy_flowey_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
+    const int waves = (int) Clamp((float) turn + 1, 1, 4);
+
 
     // Spawn projectiles nicely in an arc
     if (timer < 0.05) {
         const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) - 64;
         const int y = 48;
 
-        while (vector_size(*projectiles) < waves) {
+        while (projectiles->size < waves) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.1) {
         const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) - 32;
         const int y = 32;
 
-        while (vector_size(*projectiles) < waves * 2) {
+        while (projectiles->size < waves * 2) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.15) {
         const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2);
         const int y = 16;
 
-        while (vector_size(*projectiles) < waves * 3) {
+        while (projectiles->size < waves * 3) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.2) {
         const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) + 32;
         const int y = 32;
 
-        while (vector_size(*projectiles) < waves * 4) {
+        while (projectiles->size < waves * 4) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     } else if (timer < 0.25) {
         const int x = SCREEN_WIDTH / 2 - (assets.texture_projectile_flowey.width / 2 / 2) + 64;
         const int y = 48;
 
-        while (vector_size(*projectiles) < waves * 5) {
+        while (projectiles->size < waves * 5) {
             spawn_flowey_projectile(projectiles, x, y);
         }
     }
 
 
-    size_t size = vector_size(*projectiles);
+    const int size = projectiles->size;
+    struct Projectile *projectiles_data = (struct Projectile*)projectiles->data;
     for (int i = 0; i < size; i++) {
-        Projectile *projectile = *projectiles + i;
+        struct Projectile *projectile = &projectiles_data[i];
 
         const float delay = floorf(i % waves) * 0.2f + 0.85f;
 
@@ -90,7 +94,7 @@ bool enemy_flowey_attack(Projectile **projectiles, int type, float timer, int tu
             }
 
 
-            const float speed = Clamp((timer - delay) / 2.5f, 0, 0.8f);
+            const float speed = Clamp((timer - delay) * 256.0f, 0, 512.0f) * GetFrameTime();
 
             projectile->position.x += velocity->x * speed;
             projectile->position.y += velocity->y * speed;
@@ -104,44 +108,53 @@ bool enemy_flowey_attack(Projectile **projectiles, int type, float timer, int tu
 void enemy_flowey_pre_defeat() {
     player.flags.boss_flowey = true;
 
-    Item* item = vector_add_dst(&player.inventory);
-    item->type = COIN;
-    item->texture = &assets.texture_item_coin;
-    item->value = 1;
+    player_add_item(&player, (struct Item) {
+        .type = COIN,
+        .texture = &assets.texture_item_coin,
+        .value = 1
+    });
 }
 
-void enemy_flowey_post_defeat() {
-    setDialogue("Farmer Johan: As promised, I'll hand over the golden coin.");
+void enemy_flowey_post_defeat(struct Hud *hud) {
+    hud_set_dialogue(hud, "Farmer Johan: As promised, I'll hand over the golden coin.");
 }
 
-void spawn_flowey_projectile(Projectile **projectiles, int x, int y) {
-    Projectile *projectile = vector_add_dst(&*projectiles);
+void spawn_flowey_projectile(struct Array *projectiles, int x, int y) {
+    const int size = projectiles->size;
+    array_allocate(projectiles, sizeof(struct Projectile), size + 1);
 
-    projectile->texture = &assets.texture_projectile_flowey;
-    projectile->position = (Vector2){x, y};
-    projectile->damage = 2;
-    projectile->true_damage = false;
-    projectile->data = malloc(sizeof(Vector2));
+
+    struct Projectile projectile;
+
+    projectile.lifespan = 0;
+    projectile.texture = &assets.texture_projectile_flowey;
+    projectile.position = (Vector2){(float) x, (float) y};
+    projectile.damage = 2;
+    projectile.true_damage = false;
+    projectile.data = malloc(sizeof(Vector2));
 
     // initialize later
-    Vector2* test = (projectile->data);
+    Vector2* test = (projectile.data);
     test->x = 0;
     test->y = 0;
 
-    projectile->get_hitbox = flowey_projectile_hitbox;
-    projectile->draw = flowey_projectile_draw;
+    projectile.hitbox = flowey_projectile_hitbox;
+    projectile.draw = flowey_projectile_draw;
 
+    ((struct Projectile*)projectiles->data)[size] = projectile;
+
+    projectiles->size = size + 1;
 }
 
-void flowey_projectile_draw(Projectile *projectile) {
+void flowey_projectile_draw(struct Projectile *projectile) {
     int sprite = (int)floorf(projectile->lifespan * 20) % 2;
     int width = projectile->texture->width / 2;
 
-    Rectangle rect = {sprite * width, 0, width, projectile->texture->height};
+    Rectangle rect = {(float) sprite * (float) width, 0, (float) width, (float) projectile->texture->height};
 
     DrawTextureRec(*projectile->texture, rect, (Vector2){projectile->position.x, projectile->position.y}, WHITE);
 }
 
-Rectangle flowey_projectile_hitbox(Projectile *projectile) {
-    return (Rectangle){projectile->position.x, projectile->position.y, projectile->texture->width / 2, projectile->texture->height};
+Rectangle flowey_projectile_hitbox(struct Projectile *projectile) {
+    return (Rectangle){projectile->position.x, projectile->position.y, (float) projectile->texture->width / 2, (float) projectile->texture->height};
 }

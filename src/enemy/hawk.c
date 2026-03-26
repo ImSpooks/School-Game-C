@@ -1,4 +1,4 @@
-#include "enemy/hawk.h"
+#include "enemy/type/hawk.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -7,32 +7,34 @@
 #include "globals.h"
 #include "items.h"
 #include "enemy/enemy.h"
-#include "vec.h"
-#include "player/player.h"
-#include "screen/screen.h"
-#include "asset_manager.h"
 
-void spawn_hawk_projectile(Projectile **projectiles, int x, int y);
-void hawk_projectile_draw(Projectile *projectile);
-Rectangle hawk_projectile_hitbox(Projectile *projectile);
+#include "player/player.h"
+#include "scene/scene.h"
+#include "asset_manager.h"
+#include "enemy/projectile/projectile.h"
+
+void spawn_hawk_projectile(struct Projectile *projectiles, int x, int y);
+void hawk_projectile_draw(struct Projectile *projectile);
+Rectangle hawk_projectile_hitbox(struct Projectile *projectile);
 
 void enemy_hawk_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_hawk;
 
-    enemy->music = vector_create();
-    vector_add(&enemy->music, &assets.music_hawk_intro);
-    vector_add(&enemy->music, &assets.music_hawk_loop);
+    array_allocate(&enemy->music, sizeof(Music*), 2);
+    ((Music**) enemy->music.data)[0] = &assets.music_hawk_intro;
+    ((Music**) enemy->music.data)[1] = &assets.music_hawk_loop;
 
     assets.music_hawk_intro.looping = false;
+    enemy->music.size = 2;
 }
 
 void enemy_hawk_unload(Enemy *enemy) {
-    vector_free(enemy->music);
+    array_free(&enemy->music);
 }
 
-bool enemy_hawk_attack(Projectile **projectiles, int type, float timer, int turn) {
+bool enemy_hawk_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
 
-    printf("%d\n", type);
+    printf("%d\n", rand_type);
 
     return true;
 }
@@ -41,19 +43,19 @@ void enemy_hawk_pre_defeat() {
     player.flags.boss_hawk = true;
 }
 
-void enemy_hawk_post_defeat() {
+void enemy_hawk_post_defeat(struct Hud *hud) {
 
 }
 
-void spawn_hawk_projectile(Projectile **projectiles, int x, int y) {
+void spawn_hawk_projectile(struct Projectile *projectiles, int x, int y) {
     // TODO
 
 }
 
-void hawk_projectile_draw(Projectile *projectile) {
+void hawk_projectile_draw(struct Projectile *projectile) {
     // TODO
 }
 
-Rectangle hawk_projectile_hitbox(Projectile *projectile) {
+Rectangle hawk_projectile_hitbox(struct Projectile *projectile) {
     return (Rectangle){projectile->position.x, projectile->position.y, projectile->texture->width, projectile->texture->height};
 }

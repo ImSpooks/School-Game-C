@@ -1,8 +1,8 @@
 #ifndef TESTRAYLIB_ENEMY_H
 #define TESTRAYLIB_ENEMY_H
-#include <raylib.h>
 
-#include "enemy/projectile/projectile.h"
+#include <raylib.h>
+#include "hud.h"
 
 typedef struct Enemy Enemy;
 
@@ -11,7 +11,7 @@ typedef void (*enemy_unload_fn)(Enemy*);
 
 struct Enemy {
     Texture2D* texture;
-    Music** music;
+    struct Array music;
 
     float max_health;
     float health;
@@ -22,11 +22,9 @@ struct Enemy {
 
     enemy_initialize_fn initialize;
     enemy_unload_fn unload;
-    bool (*attack)(Projectile** /*vector*/, int /*attack type*/, float /*timer*/, int /*turn*/); // returns true if attack is done
+    bool (*attack)(struct Array *projectiles, int rand_type, float timer, int turn); // returns true if attack is done
     void (*pre_defeat)(void);
-    void (*post_defeat)(void);
-
-    Projectile* projectiles;
+    void (*post_defeat)(struct Hud *hud);
 };
 
 
