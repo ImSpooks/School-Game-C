@@ -1,6 +1,7 @@
 #include "util/array.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 void array_allocate(struct Array* array, int element_size, int size) {
     const int new_size = element_size * size;
@@ -10,7 +11,7 @@ void array_allocate(struct Array* array, int element_size, int size) {
     }
 
     if (array->data == NULL) {
-        array->data = malloc(new_size);
+        array->data = calloc(element_size, size);
         array->capacity = new_size;
         return;
     }
@@ -19,7 +20,16 @@ void array_allocate(struct Array* array, int element_size, int size) {
         return;
     }
 
-    array->data = realloc(array->data, new_size);
+    const int old_size = array->capacity;
+    void* new_data = realloc(array->data, new_size);
+    if (new_data == NULL) {
+        return;
+    }
+
+    // make new data empty
+    memset((char*)new_data + old_size, 0, (size_t)(new_size - old_size));
+
+    array->data = new_data;
     array->capacity = new_size;
 }
 

@@ -13,7 +13,10 @@
 #include "asset_manager.h"
 #include "enemy/projectile/projectile.h"
 
-Texture2D** enemy_flowey_projectile_texture;
+struct FloweyProjectileData {
+    bool initialized;
+    Vector2 velocity;
+};
 
 void spawn_flowey_projectile(struct Array *projectiles, int x, int y);
 void flowey_projectile_draw(struct Projectile *projectile);
@@ -84,22 +87,23 @@ bool enemy_flowey_attack(struct Array *projectiles, int rand_type, float timer, 
         const float delay = floorf(i % waves) * 0.2f + 0.85f;
 
         if (timer > delay) {
-            Vector2 *velocity = projectile->data;
+            struct FloweyProjectileData *data = projectile->data;
 
-            if (velocity->x == 0 && velocity->y == 0) {
+            if (!data->initialized) {
+                data->initialized = true;
 
                 Vector2 vec = { player.position.x - (projectile->position.x + 8), player.position.y - (projectile->position.y + 8) };
                 vec = Vector2Normalize(vec);
 
-                velocity->x = vec.x;
-                velocity->y = vec.y;
+                data->velocity.x = vec.x;
+                data->velocity.y = vec.y;
             }
 
 
             const float speed = Clamp((timer - delay) * 256.0f, 0, 512.0f) * GetFrameTime();
 
-            projectile->position.x += velocity->x * speed;
-            projectile->position.y += velocity->y * speed;
+            projectile->position.x += data->velocity.x * speed;
+            projectile->position.y += data->velocity.y * speed;
         }
 
     }
@@ -133,12 +137,7 @@ void spawn_flowey_projectile(struct Array *projectiles, int x, int y) {
     projectile.position = (Vector2){(float) x, (float) y};
     projectile.damage = 2;
     projectile.true_damage = false;
-    projectile.data = malloc(sizeof(Vector2));
-
-    // initialize later
-    Vector2* test = (projectile.data);
-    test->x = 0;
-    test->y = 0;
+    projectile.data = calloc(sizeof(struct FloweyProjectileData), 1);
 
     projectile.hitbox = flowey_projectile_hitbox;
     projectile.draw = flowey_projectile_draw;

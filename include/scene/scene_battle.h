@@ -5,7 +5,7 @@
 #define DEALING_DAMAGE_LENGTH       0.75f
 #define RENDERING_DAMAGE_LENGTH     1.0f
 
-#define BATTLE_BOUNDS (Rectangle) {(640 / 2) - (192 / 2), (360 / 3 * 2) - (132 / 2), 192, 132}
+#define BATTLE_BOUNDS (Rectangle) {(640.0f / 2.0f) - (192.0f / 2.0f), (360.0f / 3.0f * 2.0f) - (132.0f / 2.0f), 192.0f, 132.0f}
 #define BATTLE_BOUNDS_MIDDLE (Vector2) {BATTLE_BOUNDS.x + BATTLE_BOUNDS.width / 2.0f, BATTLE_BOUNDS.y + BATTLE_BOUNDS.height / 2.0f}
 #define BATTLE_BOUNDS_EXPAND_TIME 0.15f
 

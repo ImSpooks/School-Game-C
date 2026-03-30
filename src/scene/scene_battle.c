@@ -73,6 +73,8 @@ void battle_scene_unload(struct Scene *scene, struct Hud *hud){
         for (int i = 0; i < size; i++) {
             free(projectiles[i].data);
         }
+        data->projectiles.size = 0;
+        array_free(&data->projectiles);
     }
 
     // Stop all musics from playing
@@ -84,7 +86,6 @@ void battle_scene_unload(struct Scene *scene, struct Hud *hud){
         }
     }
 
-    array_free(&data->projectiles);
 
     hud_set_flag(hud, RENDER_ITEMS);
     hud_unset_flag(hud, RENDER_HEALTH);
@@ -138,6 +139,8 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
             player.position.y = BATTLE_BOUNDS_MIDDLE.y;
             player.invincibility_timer = 0;
 
+            data->context.enemy_rand_attack = rand() % data->enemy.total_attacks;
+
         }
     } else if (data->state == ENEMY) {
         if (data->enemy.health <= 0) {
@@ -177,6 +180,7 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
                 for (int i = 0; i < size; i++) {
                     free(projectiles[i].data);
                 }
+                data->projectiles.size = 0;
             } else {
                 Rectangle player_hitbox = (Rectangle) {player.position.x - 8, player.position.y - 8, 16, 16};
 

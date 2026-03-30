@@ -18,6 +18,6 @@ struct Projectile {
     Rectangle (*hitbox)(struct Projectile*);
 };
 
-bool projectile_collides_with_player(struct Projectile* projectile, Rectangle player_hitbox);
 void projectile_damage_player(struct Projectile* projectile, bool ignore_armor);
+void projectile_despawn(struct Projectile *projectile);
 #endif //TESTRAYLIB_PROJECTILE_H
