@@ -48,6 +48,11 @@ struct Assets {
     // projectiles
     Texture2D texture_projectile_flowey;
     Texture2D texture_projectile_bear;
+    Texture2D texture_projectile_golem;
+
+    Texture2D texture_projectile_wizard_tornado;
+    Texture2D texture_projectile_wizard_orb;
+    Texture2D texture_projectile_wizard_heal_orb;
 
     // ui
     Texture2D texture_ui_damage_bar;
@@ -80,6 +85,7 @@ struct Assets {
     Sound sfx_damage_enemy;
     Sound sfx_damage_take;
     Sound sfx_victory;
+    Sound sfx_heal;
 };
 
 void assets_load();

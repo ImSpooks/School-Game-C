@@ -16,8 +16,11 @@ struct Projectile {
 
     void (*draw)(struct Projectile*);
     Rectangle (*hitbox)(struct Projectile*);
+
+    void (*on_hit)(struct Projectile*);
 };
 
-void projectile_damage_player(struct Projectile* projectile, bool ignore_armor);
+void projectile_damage_player(struct Projectile* projectile);
+void projectile_heal_player(struct Projectile* projectile);
 void projectile_despawn(struct Projectile *projectile);
 #endif //TESTRAYLIB_PROJECTILE_H

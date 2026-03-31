@@ -141,6 +141,7 @@ void spawn_flowey_projectile(struct Array *projectiles, int x, int y) {
 
     projectile.hitbox = flowey_projectile_hitbox;
     projectile.draw = flowey_projectile_draw;
+    projectile.on_hit = projectile_damage_player;
 
     ((struct Projectile*)projectiles->data)[size] = projectile;
 

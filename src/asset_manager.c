@@ -1,5 +1,7 @@
 #include "asset_manager.h"
 
+#include <rlgl.h>
+
 struct Assets assets;
 
 void assets_load() {
@@ -42,6 +44,10 @@ void assets_load() {
     // projectiles
     assets.texture_projectile_flowey = LoadTexture("assets/textures/enemies/projectile/flowey.png");
     assets.texture_projectile_bear = LoadTexture("assets/textures/enemies/projectile/bear.png");
+    assets.texture_projectile_golem = LoadTexture("assets/textures/enemies/projectile/golem.png");
+    assets.texture_projectile_wizard_tornado = LoadTexture("assets/textures/enemies/projectile/wizard_tornado.png");
+    assets.texture_projectile_wizard_orb = LoadTexture("assets/textures/enemies/projectile/wizard_orb.png");
+    assets.texture_projectile_wizard_heal_orb = LoadTexture("assets/textures/enemies/projectile/wizard_heal_orb.png");
 
     // ui
     assets.texture_ui_damage_bar = LoadTexture("assets/textures/ui/damage_bar.png");
@@ -75,6 +81,7 @@ void assets_load() {
     assets.sfx_damage_enemy = LoadSound("assets/sfx/damage_enemy.wav");
     assets.sfx_damage_take = LoadSound("assets/sfx/damage_take.wav");
     assets.sfx_victory = LoadSound("assets/sfx/victory.wav");
+    assets.sfx_heal = LoadSound("assets/sfx/heal.wav");
 }
 
 void assets_unload() {
@@ -117,6 +124,11 @@ void assets_unload() {
     // projectiles
     UnloadTexture(assets.texture_projectile_flowey);
     UnloadTexture(assets.texture_projectile_bear);
+    UnloadTexture(assets.texture_projectile_golem);
+    UnloadTexture(assets.texture_projectile_wizard_tornado);
+    UnloadTexture(assets.texture_projectile_wizard_orb);
+    UnloadTexture(assets.texture_projectile_wizard_heal_orb);
+
 
     // ui
     UnloadTexture(assets.texture_ui_damage_bar);
@@ -149,4 +161,5 @@ void assets_unload() {
     UnloadSound(assets.sfx_damage_enemy);
     UnloadSound(assets.sfx_damage_take);
     UnloadSound(assets.sfx_victory);
+    UnloadSound(assets.sfx_heal);
 }

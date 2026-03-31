@@ -75,12 +75,12 @@ int main(void) {
     player.inventory = array_empty();
 
     // TODO
-    title_scene.load(&title_scene, &hud);
-    enum SceneType scene = TITLE;
+    // title_scene.load(&title_scene, &hud);
+    // enum SceneType scene = TITLE;
 
-    // enum SceneType scene = BATTLE;
-    // debug(&battle_data);
-    // battle_scene.load(&battle_scene, &hud);
+    enum SceneType scene = BATTLE;
+    debug(&battle_data);
+    battle_scene.load(&battle_scene, &hud);
 
     int monitor = GetCurrentMonitor();
     SetTargetFPS(GetMonitorRefreshRate(monitor));
@@ -226,7 +226,7 @@ int main(void) {
 #include "player/player.h"
 #include "asset_manager.h"
 #include "scene/scene_battle.h"
-#include "enemy/type/bear.h"
+#include "enemy/type/wizard.h"
 
 void debug(struct BattleData *data) {
     player_add_item(&player, (struct Item) {
@@ -235,17 +235,29 @@ void debug(struct BattleData *data) {
         .value = 10
     });
 
-    data->enemy = (Enemy) {
-        .max_health = 250,
-        .health = 250,
-        .attack_stat = 2,
-        .defence_stat = 8,
-        .total_attacks = 3,
+    player_add_item(&player, (struct Item) {
+        .type = DEFENCE,
+        .texture = &assets.texture_item_cloak,
+        .value = 18
+    });
 
-        .initialize = enemy_bear_initialize,
-        .unload = enemy_bear_unload,
-        .attack = enemy_bear_attack,
-        .pre_defeat = enemy_bear_pre_defeat,
-        .post_defeat = enemy_bear_post_defeat
+    player_add_item(&player, (struct Item) {
+        .type = ATTACK,
+        .texture = &assets.texture_item_strength_potion,
+        .value = 17
+    });
+
+    data->enemy = (Enemy) {
+        .max_health = 2500,
+        .health = 2500,
+        .attack_stat = 16,
+        .defence_stat = 10,
+        .total_attacks = 4,
+
+        .initialize = enemy_wizard_initialize,
+        .unload = enemy_wizard_unload,
+        .attack = enemy_wizard_attack,
+        .pre_defeat = enemy_wizard_pre_defeat,
+        .post_defeat = enemy_wizard_post_defeat
     };
 }

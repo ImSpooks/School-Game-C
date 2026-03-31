@@ -92,8 +92,8 @@ void bear_projectile_draw(struct Projectile *projectile) {
         WHITE
     );
 
-    Rectangle rectangle = bear_projectile_hitbox(projectile);
-    DrawRectangleRec(rectangle, Fade(RED, 0.5f));
+    // Rectangle rectangle = bear_projectile_hitbox(projectile);
+    // DrawRectangleRec(rectangle, Fade(RED, 0.5f));
 }
 
 Rectangle bear_projectile_hitbox(struct Projectile *projectile) {
@@ -122,6 +122,7 @@ struct Projectile* spawn_bear_projectile(struct Array *projectiles, int x, int y
 
     projectile.draw = bear_projectile_draw;
     projectile.hitbox = bear_projectile_hitbox;
+    projectile.on_hit = projectile_damage_player;
 
     ((struct Projectile*)projectiles->data)[size] = projectile;
 
@@ -132,8 +133,8 @@ struct Projectile* spawn_bear_projectile(struct Array *projectiles, int x, int y
 
 bool bear_attack_1(struct Array *projectiles, float timer) {
     // x projectiles per second
-    if (bear_attack_interval >= 1.0f / 10.0f) {
-        bear_attack_interval = 0;
+    if (bear_attack_interval >= 1.0f / 8.0f) {
+        bear_attack_interval -= 1.0f / 8.0f;
 
         bool upside_down = rand() & 1;
 
@@ -159,7 +160,6 @@ bool bear_attack_1(struct Array *projectiles, float timer) {
         struct BearProjectileData *data = projectile->data;
         const float speed = Clamp(projectile->lifespan * 222.0f, 0, 280.0f) * GetFrameTime();
 
-        projectile->position.x += data->velocity.x * speed;
         projectile->position.y += data->velocity.y * speed;
 
         bool upside_down = data->rotation > 0;
@@ -209,8 +209,10 @@ bool bear_attack_2(struct Array *projectiles, float timer) {
             if (rotation > 360)
                 rotation -= 360; // just to be sure
 
+            const float deg2rad_rotation = DEG2RAD * rotation;
+
             struct BearProjectileData *data = projectile->data;
-            data->velocity = (Vector2){cosf(DEG2RAD * rotation), sinf(DEG2RAD * rotation)};
+            data->velocity = (Vector2){cosf(deg2rad_rotation), sinf(deg2rad_rotation)};
             data->rotation = rotation + 90;
         }
     }
@@ -232,7 +234,7 @@ bool bear_attack_2(struct Array *projectiles, float timer) {
 }
 
 bool bear_attack_3(struct Array *projectiles, float timer) {
-    Vector2 locations[] = {
+    const Vector2 locations[] = {
         {225, 70},
         {225, -110},
 

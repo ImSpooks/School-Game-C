@@ -191,20 +191,22 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
 
                     Rectangle hitbox = projectile->hitbox(projectile);
 
+                    if (CheckCollisionRecs(player_hitbox, hitbox)) {
+                        if (projectile->on_hit != NULL) {
+                            projectile->on_hit(projectile);
+                        } else {
+                            projectile_damage_player(projectile);
+                        }
+                    }
+
+                    projectile->lifespan += frame_time;
+
                     // Remove projectiles outside of bounds
                     if (!CheckCollisionRecs(hitbox, (Rectangle) {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT}) || projectile->lifespan > 99) {
                         free(projectile->data);
                         *projectile = projectiles[--size];
                     }
 
-                    if (player.invincibility_timer <= 0) {
-                        if (CheckCollisionRecs(player_hitbox, hitbox)) {
-                            projectile_damage_player(projectile, projectile->true_damage);
-                            PlaySound(assets.sfx_damage_take);
-                        }
-                    }
-
-                    projectile->lifespan += frame_time;
                 }
                 if (size != data->projectiles.size)
                     data->projectiles.size = size;
@@ -235,7 +237,8 @@ void battle_scene_draw(void* scene_data) {
     }
 
     int y = 64 - (*data->enemy.texture).height / 2;
-    if (y < 16) y = 16;
+    if (y < 16)
+        y = 16;
 
     if (data->enemy.health > 0) {
         Vector2 pos = {640 / 2.0f - (float)(*data->enemy.texture).width / 2.0f, y};
