@@ -38,6 +38,8 @@ add_executable(SchoolGameC
         src/asset_manager.c
         src/util/array.c
         src/level/level_registry.c
+        src/scene/scene_gameover.c
+        src/scene/scene_credits.c
 )
 
 # Link raylib to the correct target

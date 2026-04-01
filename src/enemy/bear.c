@@ -28,9 +28,9 @@ struct BearProjectileData {
     float rotation;
 };
 
-bool bear_attack_1(struct Array *projectiles, float timer);
-bool bear_attack_2(struct Array *projectiles, float timer);
-bool bear_attack_3(struct Array *projectiles, float timer);
+bool bear_attack_1(struct Array *projectiles, float timer, bool first_tick);
+bool bear_attack_2(struct Array *projectiles, float timer, bool first_tick);
+bool bear_attack_3(struct Array *projectiles, float timer, bool first_tick);
 
 void enemy_bear_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_bear;
@@ -46,15 +46,15 @@ void enemy_bear_unload(Enemy *enemy) {
 
 }
 
-bool enemy_bear_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
+bool enemy_bear_attack(struct Array *projectiles, int rand_type, float timer, int turn, bool first_tick) {
     bool should_end = true;
 
     if (rand_type == 0) {
-        should_end = bear_attack_1(projectiles, timer);
+        should_end = bear_attack_1(projectiles, timer, first_tick);
     } else if (rand_type == 1) {
-        should_end = bear_attack_2(projectiles, timer);
+        should_end = bear_attack_2(projectiles, timer, first_tick);
     } else if (rand_type == 2) {
-        should_end = bear_attack_3(projectiles, timer);
+        should_end = bear_attack_3(projectiles, timer, first_tick);
     }
 
     if (should_end) {
@@ -131,7 +131,7 @@ struct Projectile* spawn_bear_projectile(struct Array *projectiles, int x, int y
     return &((struct Projectile*)projectiles->data)[size];
 }
 
-bool bear_attack_1(struct Array *projectiles, float timer) {
+bool bear_attack_1(struct Array *projectiles, float timer, bool first_tick) {
     // x projectiles per second
     if (bear_attack_interval >= 1.0f / 8.0f) {
         bear_attack_interval -= 1.0f / 8.0f;
@@ -174,7 +174,7 @@ bool bear_attack_1(struct Array *projectiles, float timer) {
 }
 
 
-bool bear_attack_2(struct Array *projectiles, float timer) {
+bool bear_attack_2(struct Array *projectiles, float timer, bool first_tick) {
     Vector2 locations[] = {
         {225, 70},
         {225, -20},
@@ -233,7 +233,7 @@ bool bear_attack_2(struct Array *projectiles, float timer) {
     return timer >= 8.0f;
 }
 
-bool bear_attack_3(struct Array *projectiles, float timer) {
+bool bear_attack_3(struct Array *projectiles, float timer, bool first_tick) {
     const Vector2 locations[] = {
         {225, 70},
         {225, -110},

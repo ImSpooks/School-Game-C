@@ -18,19 +18,22 @@ enum WizardProjectileType {
     ORB,
     HEAL_ORB,
     TORNADO,
+    FIREBALL,
 };
 
 struct Projectile* spawn_wizard_projectile(struct Array *projectiles, int x, int y, enum WizardProjectileType type);
 void wizard_projectile_draw(struct Projectile *projectile);
 Rectangle wizard_projectile_hitbox(struct Projectile *projectile);
-void projectile_push_player(struct Projectile *projectile);
+void wizard_projectile_push_player(struct Projectile *projectile);
+void wizard_projectile_explode(struct Projectile *projectile);
 
 float wizard_attack_interval = 0;
 int wizard_attack_index = 0;
 
-
 struct WizardProjectileData {
     Vector2 velocity;
+    float rotation;
+    enum WizardProjectileType type;
 
     //attack 1
     bool is_right_spawn;
@@ -38,16 +41,17 @@ struct WizardProjectileData {
     // attack 2
     bool initialized;
 
-    // attack 3
-    enum WizardProjectileType type;
-    int tornado_sprite;
-    float tornado_sprite_timer;
+    // attack 4
+    Vector2 spawn_location;
+    Vector2 destination;
+    float flight_duration;
+
 };
 
-bool wizard_attack_1(struct Array *projectiles, float timer);
-bool wizard_attack_2(struct Array *projectiles, float timer);
-bool wizard_attack_3(struct Array *projectiles, float timer);
-bool wizard_attack_4(struct Array *projectiles, float timer);
+bool wizard_attack_1(struct Array *projectiles, float timer, bool first_tick);
+bool wizard_attack_2(struct Array *projectiles, float timer, bool first_tick);
+bool wizard_attack_3(struct Array *projectiles, float timer, bool first_tick);
+bool wizard_attack_4(struct Array *projectiles, float timer, bool first_tick);
 
 void enemy_wizard_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_wizard;
@@ -63,19 +67,17 @@ void enemy_wizard_unload(Enemy *enemy) {
 
 }
 
-bool enemy_wizard_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
+bool enemy_wizard_attack(struct Array *projectiles, int rand_type, float timer, int turn, bool first_tick) {
     bool should_end = true;
 
-    rand_type = 2;
-
     if (rand_type == 0) {
-        should_end = wizard_attack_1(projectiles, timer);
+        should_end = wizard_attack_1(projectiles, timer, first_tick);
     } else if (rand_type == 1) {
-        should_end = wizard_attack_2(projectiles, timer);
+        should_end = wizard_attack_2(projectiles, timer, first_tick);
     } else if (rand_type == 2) {
-        should_end = wizard_attack_3(projectiles, timer);
+        should_end = wizard_attack_3(projectiles, timer, first_tick);
     } else if (rand_type == 3) {
-        should_end = wizard_attack_4(projectiles, timer);
+        should_end = wizard_attack_4(projectiles, timer, first_tick);
     }
 
 
@@ -96,7 +98,6 @@ void enemy_wizard_post_defeat(struct Hud *hud) {
 }
 
 struct Projectile* spawn_wizard_projectile(struct Array *projectiles, int x, int y, enum WizardProjectileType type) {
-
     const int size = projectiles->size;
     array_allocate(projectiles, sizeof(struct Projectile), size + 1);
 
@@ -129,7 +130,13 @@ struct Projectile* spawn_wizard_projectile(struct Array *projectiles, int x, int
         case TORNADO:
             projectile.damage = 0;
             projectile.texture = &assets.texture_projectile_wizard_tornado;
-            projectile.on_hit = projectile_damage_player;
+            projectile.on_hit = wizard_projectile_push_player;
+            break;
+
+        case FIREBALL:
+            projectile.damage = 16;
+            projectile.texture = &assets.texture_projectile_wizard_fireball;
+            projectile.on_hit = wizard_projectile_explode;
             break;
     }
 
@@ -139,7 +146,6 @@ struct Projectile* spawn_wizard_projectile(struct Array *projectiles, int x, int
     projectiles->size = size + 1;
 
     return &((struct Projectile*)projectiles->data)[size];
-
 }
 
 void wizard_projectile_draw(struct Projectile *projectile) {
@@ -155,13 +161,13 @@ void wizard_projectile_draw(struct Projectile *projectile) {
                 (Rectangle){projectile->position.x, projectile->position.y, (float) projectile->texture->width, (float) projectile->texture->height},
 
                 (Vector2){(float) projectile->texture->width / 2.0f, (float) projectile->texture->height / 2.0f},
-                0,
+                data->rotation,
                 WHITE
             );
             break;
 
         case TORNADO: {
-            const int sprite = data->tornado_sprite;
+            const int sprite = (int) floorf(projectile->lifespan * 10.0f) % 4;
             const int width = projectile->texture->width / 4;
 
             DrawTexturePro(
@@ -170,7 +176,30 @@ void wizard_projectile_draw(struct Projectile *projectile) {
                 (Rectangle){projectile->position.x, projectile->position.y, (float) width, (float) projectile->texture->height},
 
                 (Vector2){(float) width / 2.0f, (float) projectile->texture->height / 2.0f},
-                0,
+                data->rotation,
+                WHITE
+            );
+            break;
+        }
+
+        case FIREBALL: {
+            int sprite;
+            if (projectile->texture == &assets.texture_projectile_wizard_fireball) {
+                sprite = (int) floorf(projectile->lifespan * 10.0f) % 5;
+            } else {
+                struct WizardProjectileData *data = projectile->data;
+                sprite = (int) floorf((projectile->lifespan - data->flight_duration) * 8.0f) % 5;
+            }
+
+            const int width = projectile->texture->width / 5;
+
+            DrawTexturePro(
+                *projectile->texture,
+                (Rectangle){(float) sprite * (float) width, 0, (float) width, (float) projectile->texture->height},
+                (Rectangle){projectile->position.x, projectile->position.y, (float) width, (float) projectile->texture->height},
+
+                (Vector2){(float) width / 2.0f, (float) projectile->texture->height / 2.0f},
+                data->rotation,
                 WHITE
             );
             break;
@@ -183,7 +212,6 @@ void wizard_projectile_draw(struct Projectile *projectile) {
 
 Rectangle wizard_projectile_hitbox(struct Projectile *projectile) {
     struct WizardProjectileData *data = projectile->data;
-
     switch (data->type) {
         case ORB:
         case HEAL_ORB:
@@ -195,7 +223,7 @@ Rectangle wizard_projectile_hitbox(struct Projectile *projectile) {
                 projectile->texture->height - 2
             };
 
-        case TORNADO:
+        case TORNADO: {
             const int width = projectile->texture->width / 4;
 
             return (Rectangle){
@@ -204,10 +232,23 @@ Rectangle wizard_projectile_hitbox(struct Projectile *projectile) {
                 width,
                 projectile->texture->height
             };
+        }
+
+        case FIREBALL: {
+            const int width = projectile->texture->width / 5;
+
+            return (Rectangle){
+                projectile->position.x - width / 2,
+                projectile->position.y - projectile->texture->height / 2,
+                width,
+                projectile->texture->height
+            };
+        }
     }
+    return (Rectangle){0, 0, 0, 0};
 }
 
-bool wizard_attack_1(struct Array *projectiles, float timer) {
+bool wizard_attack_1(struct Array *projectiles, float timer, bool first_tick) {
     // x projectiles per second
     if (wizard_attack_interval >= 1.0f / 12.0f) {
         wizard_attack_interval -= 1.0f / 12.0f;
@@ -253,7 +294,7 @@ bool wizard_attack_1(struct Array *projectiles, float timer) {
 
 int wizard_attack_2_index = 0;
 int wizard_attack_2_type = 0;
-bool wizard_attack_2(struct Array *projectiles, float timer) {
+bool wizard_attack_2(struct Array *projectiles, float timer, bool first_tick) {
 
     float texture_width = (float) assets.texture_projectile_wizard_orb.width;
     float texture_height = (float) assets.texture_projectile_wizard_orb.height;
@@ -361,7 +402,7 @@ bool wizard_attack_2(struct Array *projectiles, float timer) {
 
 float wizard_attack_3_interval = 0;
 
-bool wizard_attack_3(struct Array *projectiles, float timer) {
+bool wizard_attack_3(struct Array *projectiles, float timer, bool first_tick) {
     const float frame_time = GetFrameTime();
 
     wizard_attack_interval += frame_time;
@@ -397,7 +438,7 @@ bool wizard_attack_3(struct Array *projectiles, float timer) {
         const float y = BATTLE_BOUNDS.y + BATTLE_BOUNDS.height + (float) texture->height / 2.0f;
 
         struct Projectile *projectile = spawn_wizard_projectile(projectiles, (int) x, (int) y, TORNADO);
-        projectile->on_hit = projectile_push_player;
+        projectile->on_hit = wizard_projectile_push_player;
 
         struct WizardProjectileData *data = projectile->data;
         data->velocity = (Vector2){0, 1.0f};
@@ -430,29 +471,86 @@ bool wizard_attack_3(struct Array *projectiles, float timer) {
             if (projectile->position.y < BATTLE_BOUNDS.y - (float) projectile->texture->height) {
                 projectile_despawn(projectile);
             }
-
-            data->tornado_sprite_timer += frame_time;
-            if (data->tornado_sprite_timer >= 0.1f) {
-                data->tornado_sprite_timer -= 0.1f;
-
-                data->tornado_sprite++;
-                if (data->tornado_sprite > 3)
-                    data->tornado_sprite = 0;
-            }
         }
     }
     return timer >= 6.0f;
 }
 
-void projectile_push_player(struct Projectile *projectile) {
+void wizard_projectile_push_player(struct Projectile *projectile) {
     const float frame_time = GetFrameTime();
 
     struct WizardProjectileData *data = projectile->data;
     const float speed = Clamp(projectile->lifespan * 96.0f, 0, 320.0f) * frame_time;
 
-    player.position.y -= __max(PLAYER_SPEED * frame_time * 0.8, speed);
+    player.position.y -= Clamp(speed, PLAYER_SPEED * frame_time * 0.8, PLAYER_SPEED * frame_time * 1.2);
 }
 
-bool wizard_attack_4(struct Array *projectiles, float timer) {
+bool wizard_attack_4(struct Array *projectiles, float timer, bool first_tick) {
+    const float frame_time = GetFrameTime();
+    wizard_attack_interval += frame_time;
 
+    if (wizard_attack_interval > 1.0f / 5.0f) {
+        wizard_attack_interval -= 1.0f / 5.0f;
+
+        const float spawn_x = Lerp(SCREEN_WIDTH / 4, SCREEN_WIDTH / 4 * 3, (float) ((double) rand() / (double) RAND_MAX));
+        const float spawn_y = Lerp(SCREEN_HEIGHT / 6, SCREEN_HEIGHT / 3, (float) ((double) rand() / (double) RAND_MAX));
+
+        const float dest_x = Lerp(BATTLE_BOUNDS.x, BATTLE_BOUNDS.x + BATTLE_BOUNDS.width, (float) ((double) rand() / (double) RAND_MAX));
+        const float dest_y = Lerp(BATTLE_BOUNDS.y, BATTLE_BOUNDS.y + BATTLE_BOUNDS.height - (float) assets.texture_projectile_wizard_fireball.height, (float) pow((double) rand() / (double) RAND_MAX, 0.3));
+
+        struct Projectile *projectile = spawn_wizard_projectile(projectiles, (int) spawn_x, (int) spawn_y, FIREBALL);
+
+        const float speed = 168.0f;
+
+        struct WizardProjectileData *data = projectile->data;
+        data->spawn_location = projectile->position;
+        data->destination = (Vector2) {dest_x, dest_y};
+        data->flight_duration = Vector2Distance(data->spawn_location, data->destination) / speed;
+
+
+        data->rotation = atan2f(dest_y - spawn_y, dest_x - spawn_x) * RAD2DEG + 90.0f;
+    }
+
+
+    const int size = projectiles->size;
+    for (int i = 0; i < size; i++) {
+        struct Projectile* projectile = &((struct Projectile*)projectiles->data)[i];
+
+        struct WizardProjectileData *data = projectile->data;
+
+        if (projectile->texture == &assets.texture_projectile_explosion) {
+            if ((projectile->lifespan - data->flight_duration) * 8.0f >= 5.0f) {
+                projectile_despawn(projectile);
+            }
+        } else {
+            const float interpolation = projectile->lifespan / data->flight_duration;
+
+            if (interpolation > 1.0f) {
+                // offset to the tip of the fireball
+                const float angle_rad = (data->rotation - 90) * DEG2RAD;
+
+                const float half_h = (float) projectile->texture->height / 2.0f;
+                projectile->position.x = data->destination.x + cosf(angle_rad) * half_h;
+                projectile->position.y = data->destination.y + sinf(angle_rad) * half_h;
+
+                wizard_projectile_explode(projectile);
+
+            } else {
+                projectile->position = Vector2Lerp(data->spawn_location, data->destination, interpolation);
+            }
+        }
+    }
+
+    return timer >= 5.5f;
+}
+
+void wizard_projectile_explode(struct Projectile *projectile) {
+    projectile->texture = &assets.texture_projectile_explosion;
+    struct WizardProjectileData *data = projectile->data;
+    projectile->lifespan = data->flight_duration;
+    data->rotation = 0.0f;
+
+    projectile->on_hit = projectile_damage_player;
+
+    PlaySound(assets.sfx_explosion);
 }

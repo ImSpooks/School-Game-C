@@ -53,6 +53,13 @@ struct Assets {
     Texture2D texture_projectile_wizard_tornado;
     Texture2D texture_projectile_wizard_orb;
     Texture2D texture_projectile_wizard_heal_orb;
+    Texture2D texture_projectile_wizard_fireball;
+
+    Texture2D texture_projectile_hawk_egg;
+    Texture2D texture_projectile_hawk_feather;
+    Texture2D texture_projectile_hawk_bird;
+
+    Texture2D texture_projectile_explosion;
 
     // ui
     Texture2D texture_ui_damage_bar;
@@ -80,12 +87,21 @@ struct Assets {
     Music music_nick;
     Music music_renoir;
 
+    Music music_gameover;
+    Music music_credits;
+
     // sfx
     Sound sfx_attack;
     Sound sfx_damage_enemy;
     Sound sfx_damage_take;
     Sound sfx_victory;
     Sound sfx_heal;
+    Sound sfx_explosion;
+
+    Sound sfx_death_voice;
+    Sound sfx_soul_gameover_break;
+    Sound sfx_soul_gameover_hit;
+
 };
 
 void assets_load();

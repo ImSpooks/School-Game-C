@@ -10,7 +10,8 @@ enum SceneType {
     TITLE,
     LEVEL,
     BATTLE,
-    CREDITS
+    GAME_OVER,
+    CREDITS,
 };
 
 struct SceneChange {

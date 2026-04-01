@@ -31,9 +31,9 @@ struct GolemProjectileData {
     int sprite;
 };
 
-bool golem_attack_1(struct Array *projectiles, float timer);
-bool golem_attack_2(struct Array *projectiles, float timer);
-bool golem_attack_3(struct Array *projectiles, float timer);
+bool golem_attack_1(struct Array *projectiles, float timer, bool first_tick);
+bool golem_attack_2(struct Array *projectiles, float timer, bool first_tick);
+bool golem_attack_3(struct Array *projectiles, float timer, bool first_tick);
 
 void enemy_golem_initialize(Enemy *enemy) {
     enemy->texture = &assets.texture_enemy_golem;
@@ -52,15 +52,15 @@ void enemy_golem_unload(Enemy *enemy) {
 
 }
 
-bool enemy_golem_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
+bool enemy_golem_attack(struct Array *projectiles, int rand_type, float timer, int turn, bool first_tick) {
     bool should_end = true;
 
     if (rand_type == 0) {
-        should_end = golem_attack_1(projectiles, timer);
+        should_end = golem_attack_1(projectiles, timer, first_tick);
     } else if (rand_type == 1) {
-        should_end = golem_attack_2(projectiles, timer);
+        should_end = golem_attack_2(projectiles, timer, first_tick);
     } else if (rand_type == 2) {
-        should_end = golem_attack_3(projectiles, timer);
+        should_end = golem_attack_3(projectiles, timer, first_tick);
     }
 
     if (should_end) {
@@ -143,7 +143,7 @@ Rectangle golem_projectile_hitbox(struct Projectile *projectile) {
     };
 }
 
-bool golem_attack_1(struct Array *projectiles, float timer) {
+bool golem_attack_1(struct Array *projectiles, float timer, bool first_tick) {
     if (golem_attack_interval == 0) {
         bool right_side = rand() & 1;
 
@@ -208,7 +208,7 @@ bool golem_attack_1(struct Array *projectiles, float timer) {
     return timer >= 7.0f;
 }
 
-bool golem_attack_2(struct Array *projectiles, float timer) {
+bool golem_attack_2(struct Array *projectiles, float timer, bool first_tick) {
     const float frame_time = GetFrameTime();
 
     golem_attack_interval += frame_time;
@@ -251,7 +251,7 @@ bool golem_attack_2(struct Array *projectiles, float timer) {
 
 int golem_attack_3_index = 0;
 
-bool golem_attack_3(struct Array *projectiles, float timer) {
+bool golem_attack_3(struct Array *projectiles, float timer, bool first_tick) {
     const float frame_time = GetFrameTime();
 
     golem_attack_interval += frame_time;

@@ -23,6 +23,7 @@ enum BattleState {
 };
 
 struct BattleContext {
+    bool first_tick;
     float timer;
     float last_damage;
     int enemy_rand_attack;

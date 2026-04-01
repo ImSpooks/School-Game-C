@@ -4,4 +4,6 @@
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 360
 
+void reset_game();
+
 #endif //SCHOOLGAMEC_GLOBALS_H

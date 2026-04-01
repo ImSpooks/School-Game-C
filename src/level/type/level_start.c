@@ -92,6 +92,4 @@ void start_attack_hawk_callback(void* old_data, struct Scene *scene, struct Hud 
         .pre_defeat = enemy_hawk_pre_defeat,
         .post_defeat = enemy_hawk_post_defeat
     };
-
-    player.health = player.maxHealth;
 }

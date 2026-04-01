@@ -36,7 +36,7 @@ void enemy_flowey_unload(Enemy *enemy) {
 
 }
 
-bool enemy_flowey_attack(struct Array *projectiles, int rand_type, float timer, int turn) {
+bool enemy_flowey_attack(struct Array *projectiles, int rand_type, float timer, int turn, bool first_tick) {
     const int waves = (int) Clamp((float) turn + 2, 2, 5);
 
 

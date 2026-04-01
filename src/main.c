@@ -6,6 +6,8 @@
 #include "scene/scene_title.h"
 #include "scene/scene_level.h"
 #include "scene/scene_battle.h"
+#include "scene/scene_gameover.h"
+#include "scene/scene_credits.h"
 
 #include "hud.h"
 #include "util/util.h"
@@ -70,7 +72,29 @@ int main(void) {
         .data = &battle_data
     };
 
-    struct Scene credits_scene = title_scene;
+    struct GameOverData gameover_data = {};
+    struct Scene gameover_scene = {
+        .load   = gameover_scene_load,
+        .unload = gameover_scene_unload,
+        .update = gameover_scene_update,
+        .draw   = gameover_scene_draw,
+
+        .music = &assets.music_gameover,
+        .hud = &hud,
+        .data = &gameover_data
+    };
+
+    struct CreditsData credits_data = {};
+    struct Scene credits_scene = {
+        .load   = credits_scene_load,
+        .unload = credits_scene_unload,
+        .update = credits_scene_update,
+        .draw   = credits_scene_draw,
+
+        .music = &assets.music_credits,
+        .hud = &hud,
+        .data = &credits_data
+    };
 
     player.inventory = array_empty();
 
@@ -115,6 +139,9 @@ int main(void) {
                 break;
             case BATTLE:
                 current_scene = &battle_scene;
+                break;
+            case GAME_OVER:
+                current_scene = &gameover_scene;
                 break;
             case CREDITS:
                 current_scene = &credits_scene;
@@ -178,6 +205,9 @@ int main(void) {
                 case BATTLE:
                     new_scene = &battle_scene;
                     break;
+                case GAME_OVER:
+                    new_scene = &gameover_scene;
+                    break;
                 case CREDITS:
                     new_scene = &credits_scene;
                     break;
@@ -223,10 +253,12 @@ int main(void) {
     return 0;
 }
 
-#include "player/player.h"
-#include "asset_manager.h"
-#include "scene/scene_battle.h"
-#include "enemy/type/wizard.h"
+void reset_game() {
+    player.health = player.maxHealth;
+    player.inventory.size = 0;
+}
+
+#include "enemy/type/hawk.h"
 
 void debug(struct BattleData *data) {
     player_add_item(&player, (struct Item) {
@@ -248,16 +280,16 @@ void debug(struct BattleData *data) {
     });
 
     data->enemy = (Enemy) {
-        .max_health = 2500,
-        .health = 2500,
-        .attack_stat = 16,
-        .defence_stat = 10,
+        .max_health = 3000,
+        .health = 3000,
+        .attack_stat = 18,
+        .defence_stat = 15,
         .total_attacks = 4,
 
-        .initialize = enemy_wizard_initialize,
-        .unload = enemy_wizard_unload,
-        .attack = enemy_wizard_attack,
-        .pre_defeat = enemy_wizard_pre_defeat,
-        .post_defeat = enemy_wizard_post_defeat
+        .initialize = enemy_hawk_initialize,
+        .unload = enemy_hawk_unload,
+        .attack = enemy_hawk_attack,
+        .pre_defeat = enemy_hawk_pre_defeat,
+        .post_defeat = enemy_hawk_post_defeat
     };
 }

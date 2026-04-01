@@ -45,9 +45,17 @@ void assets_load() {
     assets.texture_projectile_flowey = LoadTexture("assets/textures/enemies/projectile/flowey.png");
     assets.texture_projectile_bear = LoadTexture("assets/textures/enemies/projectile/bear.png");
     assets.texture_projectile_golem = LoadTexture("assets/textures/enemies/projectile/golem.png");
+
     assets.texture_projectile_wizard_tornado = LoadTexture("assets/textures/enemies/projectile/wizard_tornado.png");
     assets.texture_projectile_wizard_orb = LoadTexture("assets/textures/enemies/projectile/wizard_orb.png");
     assets.texture_projectile_wizard_heal_orb = LoadTexture("assets/textures/enemies/projectile/wizard_heal_orb.png");
+    assets.texture_projectile_wizard_fireball = LoadTexture("assets/textures/enemies/projectile/wizard_fireball.png");
+
+    assets.texture_projectile_hawk_bird = LoadTexture("assets/textures/enemies/projectile/hawk_bird.png");
+    assets.texture_projectile_hawk_feather = LoadTexture("assets/textures/enemies/projectile/hawk_feather.png");
+    assets.texture_projectile_hawk_egg = LoadTexture("assets/textures/enemies/projectile/hawk_egg.png");
+
+    assets.texture_projectile_explosion = LoadTexture("assets/textures/enemies/projectile/explosion.png");
 
     // ui
     assets.texture_ui_damage_bar = LoadTexture("assets/textures/ui/damage_bar.png");
@@ -75,6 +83,8 @@ void assets_load() {
     assets.music_nick = LoadMusicStream("assets/music/enemies/nick.ogg");
     //assets.music_renoir = LoadMusicStream("assets/music/enemies/renoir.ogg");
 
+    assets.music_gameover = LoadMusicStream("assets/music/misc/game_over.mp3");
+    assets.music_credits = LoadMusicStream("assets/music/misc/credits.mp3");
 
     // sfx
     assets.sfx_attack = LoadSound("assets/sfx/attack.wav");
@@ -82,6 +92,11 @@ void assets_load() {
     assets.sfx_damage_take = LoadSound("assets/sfx/damage_take.wav");
     assets.sfx_victory = LoadSound("assets/sfx/victory.wav");
     assets.sfx_heal = LoadSound("assets/sfx/heal.wav");
+    assets.sfx_explosion = LoadSound("assets/sfx/explosion.wav");
+
+    assets.sfx_death_voice = LoadSound("assets/sfx/death_voice.wav");
+    assets.sfx_soul_gameover_break = LoadSound("assets/sfx/soul_gameover_break.wav");
+    assets.sfx_soul_gameover_hit = LoadSound("assets/sfx/soul_gameover_hit.wav");
 }
 
 void assets_unload() {
@@ -125,9 +140,17 @@ void assets_unload() {
     UnloadTexture(assets.texture_projectile_flowey);
     UnloadTexture(assets.texture_projectile_bear);
     UnloadTexture(assets.texture_projectile_golem);
+
     UnloadTexture(assets.texture_projectile_wizard_tornado);
     UnloadTexture(assets.texture_projectile_wizard_orb);
     UnloadTexture(assets.texture_projectile_wizard_heal_orb);
+    UnloadTexture(assets.texture_projectile_wizard_fireball);
+
+    UnloadTexture(assets.texture_projectile_hawk_bird);
+    UnloadTexture(assets.texture_projectile_hawk_feather);
+    UnloadTexture(assets.texture_projectile_hawk_egg);
+
+    UnloadTexture(assets.texture_projectile_explosion);
 
 
     // ui
@@ -156,10 +179,18 @@ void assets_unload() {
     UnloadMusicStream(assets.music_nick);
     //UnloadMusicStream(assets.music_renoir);
 
+    UnloadMusicStream(assets.music_gameover);
+    UnloadMusicStream(assets.music_credits);
+
     // sfx
     UnloadSound(assets.sfx_attack);
     UnloadSound(assets.sfx_damage_enemy);
     UnloadSound(assets.sfx_damage_take);
     UnloadSound(assets.sfx_victory);
     UnloadSound(assets.sfx_heal);
+    UnloadSound(assets.sfx_explosion);
+
+    UnloadSound(assets.sfx_death_voice);
+    UnloadSound(assets.sfx_soul_gameover_break);
+    UnloadSound(assets.sfx_soul_gameover_hit);
 }

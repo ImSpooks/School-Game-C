@@ -86,7 +86,6 @@ void battle_scene_unload(struct Scene *scene, struct Hud *hud){
         }
     }
 
-
     hud_set_flag(hud, RENDER_ITEMS);
     hud_unset_flag(hud, RENDER_HEALTH);
 }
@@ -140,6 +139,7 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
             player.invincibility_timer = 0;
 
             data->context.enemy_rand_attack = rand() % data->enemy.total_attacks;
+            data->context.first_tick = true;
 
         }
     } else if (data->state == ENEMY) {
@@ -168,7 +168,7 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
                                       BATTLE_BOUNDS.x + BATTLE_BOUNDS.width - 8 - 3);
             player.position.y = Clamp(player.position.y, BATTLE_BOUNDS.y + 8 + 3, BATTLE_BOUNDS.y + BATTLE_BOUNDS.height - 8 - 3);
 
-            if (data->enemy.attack(&data->projectiles, data->context.enemy_rand_attack, data->context.timer - BATTLE_BOUNDS_EXPAND_TIME, data->turn)) {
+            if (data->enemy.attack(&data->projectiles, data->context.enemy_rand_attack, data->context.timer - BATTLE_BOUNDS_EXPAND_TIME, data->turn, data->context.first_tick)) {
                 data->context.timer = 0;
                 data->state = ENEMY_FINISH;
                 data->turn++;
@@ -182,6 +182,8 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
                 }
                 data->projectiles.size = 0;
             } else {
+                data->context.first_tick = false;
+
                 Rectangle player_hitbox = (Rectangle) {player.position.x - 8, player.position.y - 8, 16, 16};
 
                 int size = data->projectiles.size;
@@ -375,7 +377,7 @@ void battle_attack(struct Scene *scene, struct Hud *hud) {
         damage = damage * player_get_attack(player) / sqrtf(powf((float)data->enemy.defence_stat, 1.75f));
         damage = damage * (powf((float)data->turn / 10.0f, 2) + 1);
 
-        data->context.last_damage = damage * 1;
+        data->context.last_damage = damage * 100;
 
         data->context.timer = 0;
         data->state = DEALING_DAMAGE;
@@ -389,7 +391,7 @@ void end_battle_button(struct Scene *scene, struct Hud *hud) {
     hud->buttons.size = 0;
 
     if (player.flags.boss_hawk) {
-
+        scene->request_scene_change.type = CREDITS;
     } else {
         scene->request_scene_change.type = LEVEL;
     }
