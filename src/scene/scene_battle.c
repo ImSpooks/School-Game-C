@@ -213,6 +213,11 @@ void battle_scene_update(struct Scene *scene, struct Hud *hud) {
                 if (size != data->projectiles.size)
                     data->projectiles.size = size;
             }
+
+            if (player.health <= 0) {
+                scene->request_scene_change.type = GAME_OVER;
+                data->state = PLAYER_TURN;
+            }
         }
     } else if (data->state == ENEMY_FINISH) {
         if (data->context.timer >= BATTLE_BOUNDS_EXPAND_TIME) {

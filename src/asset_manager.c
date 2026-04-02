@@ -63,6 +63,7 @@ void assets_load() {
     assets.texture_ui_damage_slider = LoadTexture("assets/textures/ui/damage_slider.png");
     assets.texture_ui_soul = LoadTexture("assets/textures/ui/soul.png");
     assets.texture_ui_soul_broken = LoadTexture("assets/textures/ui/soul_broken.png");
+    assets.texture_ui_soul_pieces = LoadTexture("assets/textures/ui/soul_pieces.png");
 
     // -------------------------------
     // Music
@@ -159,6 +160,7 @@ void assets_unload() {
     UnloadTexture(assets.texture_ui_damage_slider);
     UnloadTexture(assets.texture_ui_soul);
     UnloadTexture(assets.texture_ui_soul_broken);
+    UnloadTexture(assets.texture_ui_soul_pieces);
 
     // -------------------------------
     // Music

@@ -177,7 +177,7 @@ bool golem_attack_1(struct Array *projectiles, float timer, bool first_tick) {
 
         struct GolemProjectileData *data = projectile->data;
 
-        // Old game was 0.995 per 20ms (50 ticks/s), 0.995^50 = 0.7783 units/s
+        // Old game was x * 0.995 per 20ms (50 ticks/s), 0.995^50 = 0.7783 units/s
         data->velocity.x = data->velocity.x * powf(0.7783f, frame_time);
         // Old game was y - 0.3 per 20ms (50 ticks/s), 0.3 * 50 = 15 units/s
         data->velocity.y -= 15.0f * frame_time;

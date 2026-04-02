@@ -67,6 +67,7 @@ struct Assets {
     Texture2D texture_ui_damage_slider;
     Texture2D texture_ui_soul;
     Texture2D texture_ui_soul_broken;
+    Texture2D texture_ui_soul_pieces;
 
     // -------------------------------
     // Music

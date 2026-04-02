@@ -79,7 +79,7 @@ int main(void) {
         .update = gameover_scene_update,
         .draw   = gameover_scene_draw,
 
-        .music = &assets.music_gameover,
+        .music = &assets.empty_music,
         .hud = &hud,
         .data = &gameover_data
     };
@@ -102,9 +102,12 @@ int main(void) {
     // title_scene.load(&title_scene, &hud);
     // enum SceneType scene = TITLE;
 
-    enum SceneType scene = BATTLE;
-    debug(&battle_data);
-    battle_scene.load(&battle_scene, &hud);
+    // enum SceneType scene = BATTLE;
+    // debug(&battle_data);
+    // battle_scene.load(&battle_scene, &hud);
+
+    gameover_scene.load(&gameover_scene, &hud);
+    enum SceneType scene = GAME_OVER;
 
     int monitor = GetCurrentMonitor();
     SetTargetFPS(GetMonitorRefreshRate(monitor));
