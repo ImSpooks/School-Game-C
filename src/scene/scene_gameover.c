@@ -37,7 +37,7 @@ void gameover_scene_load(struct Scene *scene, struct Hud *hud) {
 
     // dont render yet
     hud->buttons.size = 0;
-
+    hud_hide_dialogue(hud);
 }
 
 void gameover_scene_unload(struct Scene *scene, struct Hud *hud) {

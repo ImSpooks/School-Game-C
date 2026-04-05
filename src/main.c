@@ -102,12 +102,12 @@ int main(void) {
     // title_scene.load(&title_scene, &hud);
     // enum SceneType scene = TITLE;
 
-    // enum SceneType scene = BATTLE;
-    // debug(&battle_data);
-    // battle_scene.load(&battle_scene, &hud);
+    enum SceneType scene = BATTLE;
+    debug(&battle_data);
+    battle_scene.load(&battle_scene, &hud);
 
-    gameover_scene.load(&gameover_scene, &hud);
-    enum SceneType scene = GAME_OVER;
+    // gameover_scene.load(&gameover_scene, &hud);
+    // enum SceneType scene = GAME_OVER;
 
     int monitor = GetCurrentMonitor();
     SetTargetFPS(GetMonitorRefreshRate(monitor));
@@ -287,7 +287,7 @@ void debug(struct BattleData *data) {
         .health = 3000,
         .attack_stat = 18,
         .defence_stat = 15,
-        .total_attacks = 4,
+        .total_attacks = 3,
 
         .initialize = enemy_hawk_initialize,
         .unload = enemy_hawk_unload,

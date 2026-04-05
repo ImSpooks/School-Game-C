@@ -68,8 +68,6 @@ void enemy_hawk_unload(Enemy *enemy) {
 
 bool enemy_hawk_attack(struct Array *projectiles, int rand_type, float timer, int turn, bool first_tick) {
     bool should_end = true;
-    
-    rand_type = 2;
 
     if (rand_type == 0) {
         should_end = hawk_attack_1(projectiles, timer, first_tick);

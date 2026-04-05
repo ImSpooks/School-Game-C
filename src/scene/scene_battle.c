@@ -382,7 +382,7 @@ void battle_attack(struct Scene *scene, struct Hud *hud) {
         damage = damage * player_get_attack(player) / sqrtf(powf((float)data->enemy.defence_stat, 1.75f));
         damage = damage * (powf((float)data->turn / 10.0f, 2) + 1);
 
-        data->context.last_damage = damage * 100;
+        data->context.last_damage = damage;
 
         data->context.timer = 0;
         data->state = DEALING_DAMAGE;

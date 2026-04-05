@@ -84,7 +84,7 @@ void start_attack_hawk_callback(void* old_data, struct Scene *scene, struct Hud 
         .health = 3000,
         .attack_stat = 18,
         .defence_stat = 15,
-        .total_attacks = 4,
+        .total_attacks = 3,
 
         .initialize = enemy_hawk_initialize,
         .unload = enemy_hawk_unload,

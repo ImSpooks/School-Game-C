@@ -23,9 +23,6 @@ void projectile_damage_player(struct Projectile* projectile) {
     player.health -= damage;
     player.invincibility_timer = 0.5f;
     PlaySound(assets.sfx_damage_take);
-
-    // for now
-    player.health = 0.0f;
 }
 
 void projectile_heal_player(struct Projectile* projectile) {
