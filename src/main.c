@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <raylib.h>
+#include <time.h>
+
 #include "globals.h"
 
 #include "scene/scene.h"
@@ -15,9 +17,9 @@
 #include "asset_manager.h"
 #include "level/level_registry.h"
 
-void debug(struct BattleData *data);
-
 int main(void) {
+    srand(time(NULL));
+
     InitWindow(1280, 720, "Adventure Game");
     InitAudioDevice();
 
@@ -79,7 +81,7 @@ int main(void) {
         .update = gameover_scene_update,
         .draw   = gameover_scene_draw,
 
-        .music = &assets.empty_music,
+        .music = &assets.music_gameover,
         .hud = &hud,
         .data = &gameover_data
     };
@@ -98,20 +100,11 @@ int main(void) {
 
     player.inventory = array_empty();
 
-    // TODO
-    // title_scene.load(&title_scene, &hud);
-    // enum SceneType scene = TITLE;
-
-    enum SceneType scene = BATTLE;
-    debug(&battle_data);
-    battle_scene.load(&battle_scene, &hud);
-
-    // gameover_scene.load(&gameover_scene, &hud);
-    // enum SceneType scene = GAME_OVER;
+    title_scene.load(&title_scene, &hud);
+    enum SceneType scene = TITLE;
 
     int monitor = GetCurrentMonitor();
     SetTargetFPS(GetMonitorRefreshRate(monitor));
-
 
     const RenderTexture2D screenRenderer = LoadRenderTexture(SCREEN_WIDTH, SCREEN_HEIGHT);
     long frame = 0;
@@ -259,40 +252,4 @@ int main(void) {
 void reset_game() {
     player.health = player.maxHealth;
     player.inventory.size = 0;
-}
-
-#include "enemy/type/hawk.h"
-
-void debug(struct BattleData *data) {
-    player_add_item(&player, (struct Item) {
-        .type = ATTACK,
-        .texture = &assets.texture_item_sword,
-        .value = 10
-    });
-
-    player_add_item(&player, (struct Item) {
-        .type = DEFENCE,
-        .texture = &assets.texture_item_cloak,
-        .value = 18
-    });
-
-    player_add_item(&player, (struct Item) {
-        .type = ATTACK,
-        .texture = &assets.texture_item_strength_potion,
-        .value = 17
-    });
-
-    data->enemy = (Enemy) {
-        .max_health = 3000,
-        .health = 3000,
-        .attack_stat = 18,
-        .defence_stat = 15,
-        .total_attacks = 3,
-
-        .initialize = enemy_hawk_initialize,
-        .unload = enemy_hawk_unload,
-        .attack = enemy_hawk_attack,
-        .pre_defeat = enemy_hawk_pre_defeat,
-        .post_defeat = enemy_hawk_post_defeat
-    };
 }

@@ -43,6 +43,10 @@ void gameover_scene_load(struct Scene *scene, struct Hud *hud) {
 void gameover_scene_unload(struct Scene *scene, struct Hud *hud) {
     struct GameOverData *data = scene->data;
     array_free(&data->soul_particles);
+
+    if (IsMusicStreamPlaying(*scene->music)) {
+        StopMusicStream(*scene->music);
+    }
 }
 
 void gameover_scene_update(struct Scene *scene, struct Hud *hud) {
@@ -81,7 +85,6 @@ void gameover_scene_update(struct Scene *scene, struct Hud *hud) {
         data->state = ASGORE;
         data->timer = 0.0f;
 
-        scene->music = &assets.music_gameover;
         if (!IsMusicStreamPlaying(*scene->music)) {
             PlayMusicStream(*scene->music);
         }

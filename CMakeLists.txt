@@ -40,6 +40,8 @@ add_executable(SchoolGameC
         src/level/level_registry.c
         src/scene/scene_gameover.c
         src/scene/scene_credits.c
+        src/enemy/nick.c
+        src/enemy/renoir.c
 )
 
 # Link raylib to the correct target

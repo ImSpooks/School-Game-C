@@ -5,6 +5,7 @@
 
 struct CreditsData {
     float timer;
+    float max_timer; // timer value at which "Thanks for playing!" is centered
 };
 
 void credits_scene_load(struct Scene *scene, struct Hud *hud);

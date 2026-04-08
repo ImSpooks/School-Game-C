@@ -86,7 +86,8 @@ struct Assets {
     Music music_hawk_intro;
     Music music_hawk_loop;
     Music music_nick;
-    Music music_renoir;
+    Music music_renoir_intro;
+    Music music_renoir_loop;
 
     Music music_gameover;
     Music music_credits;

@@ -395,7 +395,7 @@ void battle_attack(struct Scene *scene, struct Hud *hud) {
 void end_battle_button(struct Scene *scene, struct Hud *hud) {
     hud->buttons.size = 0;
 
-    if (player.flags.boss_hawk) {
+    if (player.flags.boss_hawk || player.flags.boss_nick || player.flags.boss_renoir) {
         scene->request_scene_change.type = CREDITS;
     } else {
         scene->request_scene_change.type = LEVEL;
