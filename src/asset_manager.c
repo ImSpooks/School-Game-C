@@ -70,23 +70,23 @@ void assets_load() {
     // -------------------------------
 
     // level
-    assets.music_forest = LoadMusicStream("assets/music/levels/forest.wav");
-    assets.music_village = LoadMusicStream("assets/music/levels/village.wav");
+    assets.music_forest = LoadMusicStream("assets/music/levels/forest.ogg");
+    assets.music_village = LoadMusicStream("assets/music/levels/village.ogg");
 
     // enemy
-    assets.music_flowey = LoadMusicStream("assets/music/enemies/flowey.wav");
-    assets.music_bear = LoadMusicStream("assets/music/enemies/bear.wav");
-    assets.music_golem_intro = LoadMusicStream("assets/music/enemies/golem_intro.wav");
-    assets.music_golem_loop = LoadMusicStream("assets/music/enemies/golem_loop.wav");
-    assets.music_wizard = LoadMusicStream("assets/music/enemies/wizard.wav");
-    assets.music_hawk_intro = LoadMusicStream("assets/music/enemies/hawk_intro.wav");
-    assets.music_hawk_loop = LoadMusicStream("assets/music/enemies/hawk_loop.wav");
-    assets.music_nick = LoadMusicStream("assets/music/enemies/nick.wav");
-    assets.music_renoir_intro = LoadMusicStream("assets/music/enemies/renoir_intro.wav");
-    assets.music_renoir_loop = LoadMusicStream("assets/music/enemies/renoir_loop.wav");
+    assets.music_flowey = LoadMusicStream("assets/music/enemies/flowey.ogg");
+    assets.music_bear = LoadMusicStream("assets/music/enemies/bear.ogg");
+    assets.music_golem_intro = LoadMusicStream("assets/music/enemies/golem_intro.ogg");
+    assets.music_golem_loop = LoadMusicStream("assets/music/enemies/golem_loop.ogg");
+    assets.music_wizard = LoadMusicStream("assets/music/enemies/wizard.ogg");
+    assets.music_hawk_intro = LoadMusicStream("assets/music/enemies/hawk_intro.ogg");
+    assets.music_hawk_loop = LoadMusicStream("assets/music/enemies/hawk_loop.ogg");
+    assets.music_nick = LoadMusicStream("assets/music/enemies/nick.ogg");
+    assets.music_renoir_intro = LoadMusicStream("assets/music/enemies/renoir_intro.ogg");
+    assets.music_renoir_loop = LoadMusicStream("assets/music/enemies/renoir_loop.ogg");
 
-    assets.music_gameover = LoadMusicStream("assets/music/misc/game_over.wav");
-    assets.music_credits = LoadMusicStream("assets/music/misc/credits.wav");
+    assets.music_gameover = LoadMusicStream("assets/music/misc/game_over.ogg");
+    assets.music_credits = LoadMusicStream("assets/music/misc/credits.ogg");
 
     // sfx
     assets.sfx_attack = LoadSound("assets/sfx/attack.wav");

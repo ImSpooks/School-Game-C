@@ -158,7 +158,9 @@ void credits_scene_update(struct Scene *scene, struct Hud *hud) {
 void credits_scene_draw(void *scene_data) {
     ClearBackground(BLACK);
 
-    int y = SCREEN_HEIGHT - __min(((struct CreditsData*) scene_data)->timer, ((struct CreditsData*) scene_data)->max_timer) * SCROLL_SPEED;
+    float timer     = ((struct CreditsData*) scene_data)->timer;
+    float max_timer = ((struct CreditsData*) scene_data)->max_timer;
+    int y = SCREEN_HEIGHT - (int) ((timer < max_timer ? timer : max_timer) * SCROLL_SPEED);
 
     for (int i = 0; i < credits_length; i++) {
         if (y > SCREEN_HEIGHT) {

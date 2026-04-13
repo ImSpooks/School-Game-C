@@ -4,6 +4,12 @@ set(CMAKE_C_STANDARD 99)
 project(SchoolGameC C)
 
 include(FetchContent)
+
+if (EMSCRIPTEN)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_GLFW=3 -s ASSERTIONS=1 -s WASM=1 -s GL_ENABLE_GET_PROC_ADDRESS=1")
+    set(CMAKE_EXECUTABLE_SUFFIX ".html") # This line is used to set your executable to build with the emscripten html template so that you can directly open it.
+endif ()
+
 FetchContent_Declare(raylib GIT_REPOSITORY "https://github.com/raysan5/raylib.git")
 FetchContent_MakeAvailable(raylib)
 
@@ -47,5 +53,11 @@ add_executable(SchoolGameC
 # Link raylib to the correct target
 target_link_libraries(SchoolGameC raylib)
 
-set_target_properties(SchoolGameC PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/out)
-file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_SOURCE_DIR}/out)
+if(NOT EMSCRIPTEN)
+    set_target_properties(SchoolGameC PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/out)
+    file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_SOURCE_DIR}/out)
+else()
+    set_target_properties(SchoolGameC PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/web
+    )
+endif()
