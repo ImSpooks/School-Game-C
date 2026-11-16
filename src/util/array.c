@@ -34,9 +34,11 @@ void array_allocate(struct Array* array, int element_size, int size) {
 }
 
 void array_free(struct Array *array) {
+    array->size = 0;
     array->capacity = 0;
     if (array->data !=  NULL) {
         free(array->data);
+        array->data = NULL;
     }
 
 }
