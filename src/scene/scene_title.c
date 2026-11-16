@@ -9,6 +9,7 @@
 #include "enemy/enemy.h"
 #include "enemy/type/nick.h"
 #include "enemy/type/renoir.h"
+#include "level/level_registry.h"
 #include "scene/scene_battle.h"
 #include "scene/scene_level.h"
 
@@ -20,7 +21,7 @@ void fight_nick_callback(void* old_data, struct Scene *scene, struct Hud *hud);
 void fight_renoir(struct Scene *scene, struct Hud *hud);
 void fight_renoir_callback(void* old_data, struct Scene *scene, struct Hud *hud);
 
-
+void set_starting_level(void* old_data, struct Scene* new_scene, struct Hud *hud);
 
 
 KeyboardKey *konami_code = (KeyboardKey[]) {
@@ -63,6 +64,7 @@ void title_scene_update(struct Scene *scene, struct Hud *hud) {
         if (data->timer > 1.0f) {
 
             scene->request_scene_change.type = LEVEL;
+            scene->request_scene_change.callback = set_starting_level;
         }
     }
 
@@ -141,4 +143,9 @@ void fight_renoir_callback(void* old_data, struct Scene *scene, struct Hud *hud)
         .pre_defeat = enemy_renoir_pre_defeat,
         .post_defeat = enemy_renoir_post_defeat
     };
+}
+
+void set_starting_level(void* old_data, struct Scene* new_scene, struct Hud *hud) {
+    struct LevelData *data = new_scene->data;
+    data->current_level = &level_registry.levelStart;
 }

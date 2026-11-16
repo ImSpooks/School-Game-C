@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <raylib.h>
+#include <stdio.h>
 #include <time.h>
 
 #include "globals.h"
@@ -252,4 +253,14 @@ int main(void) {
 void reset_game() {
     player.health = player.maxHealth;
     player.inventory.size = 0;
+
+    player.flags.boss_flowey = false;
+    player.flags.boss_bear = false;
+    player.flags.boss_golem = false;
+    player.flags.boss_wizard = false;
+    player.flags.boss_hawk = false;
+    player.flags.boss_nick = false;
+    player.flags.boss_renoir = false;
+    player.flags.paid_pirate = false;
+    player.flags.healed_angel = false;
 }
